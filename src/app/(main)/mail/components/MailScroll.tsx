@@ -32,6 +32,7 @@ interface MailListProps {
   // You can define any props needed here
   mails: Mail[]
   defaultLayout: number[] | undefined
+  children?:React.ReactNode
 }
 
 const MailScroll: React.FC<MailListProps> = ({
@@ -119,9 +120,6 @@ const MailScroll: React.FC<MailListProps> = ({
                         <div className="flex w-full flex-col gap-1">
                           <div className="flex items-center">
                             <div className="flex items-center gap-2">
-                              {/* 
-                              // MARK: Unread
-                              */}
                               <div className="font-semibold">{item.name}</div>
                               {!item.read && (
                                 <span className="flex h-2 w-2 rounded-full bg-blue-600" />
@@ -163,8 +161,76 @@ const MailScroll: React.FC<MailListProps> = ({
                 </ScrollArea>
               </div>
             </TabsContent>
+
+            {/* 
+            // MARK: Unread
+            */}
             <TabsContent value="unread" className="m-0">
-              <MailList items={mails.filter((item) => !item.read)} />
+              <div className='flex flex-col h-fit'>
+                <ScrollArea className="flex-grow max-h-screen h-screen overflow-y-auto pb-32">
+                  <div className="flex flex-col gap-2 p-4 pt-0">
+                    {mails
+                    .filter((item) => item.read === false)
+                    .map((item) => (
+                      // MARK: Mail item
+                      <button
+                        key={item.id}
+                        className={cn(
+                          "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent",
+                          mail.selected === item.id && "bg-muted"
+                        )}
+                        onClick={() =>
+                          // INFO: 使用Atom全局变量
+                          // INFO: 点击之后把当前email变成selectedEmail，传递给emailDisplay展示出来
+                          setMail({
+                            ...mail,
+                            selected: item.id,
+                          })
+                        }
+                      >
+                        <div className="flex w-full flex-col gap-1">
+                          <div className="flex items-center">
+                            <div className="flex items-center gap-2">
+                              <div className="font-semibold">{item.name}</div>
+                              {!item.read && (
+                                <span className="flex h-2 w-2 rounded-full bg-blue-600" />
+                              )}
+                            </div>
+                            <div
+                              className={cn(
+                                "ml-auto text-xs",
+                                mail.selected === item.id
+                                  ? "text-foreground"
+                                  : "text-muted-foreground"
+                              )}
+                            >
+                              {formatDistanceToNow(new Date(item.date), {
+                                addSuffix: true,
+                              })}
+                            </div>
+                          </div>
+                          <div className="text-xs font-medium">{item.subject}</div>
+                        </div>
+                        <div className="line-clamp-2 text-xs text-muted-foreground">
+                          {item.text.substring(0, 300)}
+                        </div>
+                        {/* 
+                        // MARK: Attr Badge
+                        */}
+                        {item.labels.length ? (
+                          <div className="flex items-center gap-2">
+                            {item.labels.map((label) => (
+                              <Badge key={label} variant={getBadgeVariantFromLabel(label)}>
+                                {label}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : null}
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
             </TabsContent>
           </Tabs>
         </ResizablePanel>

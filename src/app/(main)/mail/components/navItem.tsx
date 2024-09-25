@@ -48,6 +48,10 @@ export function NavItem({ links, isCollapsed }: NavProps) {
               </TooltipTrigger>
               <TooltipContent side="right" className="flex items-center gap-4">
                 {link.title}
+                {/* 
+                //TODO: 显示邮件的个数
+                //MARK: 显示邮件的个数
+                */}
                 {link.label && (
                   <span className="ml-auto text-muted-foreground">
                     {link.label}

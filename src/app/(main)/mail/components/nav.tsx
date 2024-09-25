@@ -18,21 +18,10 @@ import {
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import {
-  ResizableHandle,
   ResizablePanel,
-  ResizablePanelGroup,
 } from "@/components/ui/resizable"
 import { Separator } from "@/components/ui/separator"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import { TooltipProvider } from "@/components/ui/tooltip"
 import { AccountSwitcher } from "./account-switcher"
-import { MailDisplay } from "./mail-display"
-import { MailList } from "./badgeHighlight"
 import { type Mail } from "../../../../lib/data"
 import { NavItem } from "./navItem"
 import { ModeToggle } from "@/components/ui/mode-toggle"
@@ -120,8 +109,8 @@ const Nav: React.FC<NavProps> = ({
             title: "Drafts",
             label: "9",
             icon: File,
-            href:"/mail/drafts",
-            variant:pathname === "/mail/drafts" ? "default" : "ghost",
+            href:"/mail/draft",
+            variant:pathname === "/mail/draft" ? "default" : "ghost",
           },
           {
             title: "Sent",

@@ -1,22 +1,6 @@
 import * as React from "react"
-import {
-  Search,
-} from "lucide-react"
-
-import { Input } from "@/components/ui/input"
-import {
-  ResizablePanel
-} from "@/components/ui/resizable"
-import { Separator } from "@/components/ui/separator"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
 import { cookies } from "next/headers"
 import { mails } from "@/lib/data"
-import { MailList } from "./components/badgeHighlight"
 import MailScroll from "./components/MailScroll"
 
 export default function MailPage() {

@@ -1,4 +1,18 @@
 // MARK: Mails
+export interface Email {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  text: string;
+  date: string;
+  read: boolean;
+  labels: string[];
+  tags: string[];
+  isTrash: boolean;
+  isArchive: boolean;
+}
+
 export const mails = [
   {
     id: "6c84fb90-12c4-11e1-840d-7b25c5ee775a",
@@ -9,7 +23,7 @@ export const mails = [
     date: "2023-10-22T09:00:00",
     read: true,
     labels: ["meeting", "work", "important"],
-    tags:['draft','sent','junk'],
+    tags:['sent','junk'],
     isTrash:false,
     isArchive:false
   },
@@ -22,7 +36,7 @@ export const mails = [
     date: "2023-10-22T10:30:00",
     read: true,
     labels: ["work", "important"],
-    tags:['draft','sent'],
+    tags:['sent'],
     isTrash:false,
     isArchive:false
   },
@@ -35,7 +49,7 @@ export const mails = [
     date: "2023-04-10T11:45:00",
     read: true,
     labels: ["personal"],
-    tags:['draft','sent','junk'],
+    tags:['sent','junk'],
     isTrash:false,
     isArchive:false
   },
@@ -48,7 +62,7 @@ export const mails = [
     date: "2023-03-25T13:15:00",
     read: false,
     labels: ["work", "budget"],
-    tags:['draft','sent'],
+    tags:['sent'],
     isTrash:false,
     isArchive:false
   },
@@ -61,7 +75,7 @@ export const mails = [
     date: "2023-03-10T15:00:00",
     read: false,
     labels: ["meeting", "work", "important"],
-    tags:['draft','sent'],
+    tags:['sent'],
     isTrash:false,
     isArchive:false
   },
@@ -74,8 +88,8 @@ export const mails = [
     date: "2023-02-15T16:30:00",
     read: true,
     labels: ["work"],
-    tags:['draft','sent'],
-    isTrash:false,
+    tags:['sent'],
+    isTrash:true,
     isArchive:false
   },
   {
@@ -87,7 +101,7 @@ export const mails = [
     date: "2023-01-28T17:45:00",
     read: false,
     labels: ["meeting", "work", "important"],
-    tags:['draft','sent'],
+    tags:['sent'],
     isTrash:false,
     isArchive:false
   },
@@ -100,8 +114,8 @@ export const mails = [
     date: "2022-12-20T18:30:00",
     read: true,
     labels: ["personal"],
-    tags:['draft','sent'],
-    isTrash:false,
+    tags:['sent'],
+    isTrash:true,
     isArchive:false
   },
   {
@@ -113,7 +127,7 @@ export const mails = [
     date: "2022-11-30T19:15:00",
     read: true,
     labels: ["work", "conference"],
-    tags:['draft','sent'],
+    tags:['sent'],
     isTrash:false,
     isArchive:false
   },
@@ -128,7 +142,7 @@ export const mails = [
     labels: ["meeting", "work"],
     tags:['draft','sent'],
     isTrash:false,
-    isArchive:false
+    isArchive:true
   },
   {
     id: "99a88f78-3eb4-4d87-87b7-7b15a49a0a05",
@@ -152,7 +166,7 @@ export const mails = [
     date: "2022-10-10T10:45:00",
     read: true,
     labels: ["meeting", "work"],
-    tags:['draft','sent'],
+    tags:['sent'],
     isTrash:false,
     isArchive:false
   },
@@ -165,7 +179,7 @@ export const mails = [
     date: "2022-09-20T12:00:00",
     read: false,
     labels: ["meeting", "work", "important"],
-    tags:['draft','sent'],
+    tags:['sent'],
     isTrash:false,
     isArchive:false
   },
@@ -178,7 +192,7 @@ export const mails = [
     date: "2022-09-10T13:15:00",
     read: true,
     labels: ["personal", "travel"],
-    tags:['draft','sent'],
+    tags:['sent'],
     isTrash:false,
     isArchive:false
   },
@@ -191,7 +205,7 @@ export const mails = [
     date: "2022-08-25T15:30:00",
     read: false,
     labels: ["meeting", "work"],
-    tags:['draft','sent'],
+    tags:['sent'],
     isTrash:false,
     isArchive:false
   },
@@ -204,9 +218,9 @@ export const mails = [
     date: "2022-08-10T16:45:00",
     read: true,
     labels: ["work", "budget"],
-    tags:['draft','sent'],
+    tags:['sent'],
     isTrash:false,
-    isArchive:false
+    isArchive:true
   },
   {
     id: "6c9a7f94-8329-4d70-95d3-51f68c186ae1",
@@ -217,7 +231,7 @@ export const mails = [
     date: "2022-07-28T17:30:00",
     read: false,
     labels: ["personal"],
-    tags:['draft','sent'],
+    tags:['sent','template'],
     isTrash:false,
     isArchive:false
   },
