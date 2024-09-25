@@ -42,7 +42,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Mail } from "../data"
+import { Mail } from "../../../../lib/data"
 
 interface MailDisplayProps {
   mail: Mail | null

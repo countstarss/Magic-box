@@ -1,3 +1,4 @@
+'use client'
 import * as React from "react"
 import {
   AlertCircle,
@@ -31,11 +32,11 @@ import {
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AccountSwitcher } from "./account-switcher"
 import { MailDisplay } from "./mail-display"
-import { MailList } from "./mail-list"
-import { type Mail } from "../data"
-import { useMail } from "../use-mail"
+import { MailList } from "./badgeHighlight"
+import { type Mail } from "../../../../lib/data"
 import { NavItem } from "./navItem"
 import { ModeToggle } from "@/components/ui/mode-toggle"
+import { usePathname } from "next/navigation"
 
 interface NavProps {
   // You can define any props needed here
@@ -58,6 +59,8 @@ const Nav: React.FC<NavProps> = ({
   navCollapsedSize,
 }) => {
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed)
+  const pathname = usePathname();
+
 
   return (
     <ResizablePanel
@@ -105,40 +108,41 @@ const Nav: React.FC<NavProps> = ({
       <NavItem
         isCollapsed={isCollapsed}
         links={[
+          // TODO: 使用pathname来确定哪一个按钮应该高亮
           {
             title: "Inbox",
             label: "128",
             icon: Inbox,
-            href:"inbox",
-            variant: "default",
+            href:"/mail",
+            variant: pathname === "/mail" ? "default" : "ghost",
           },
           {
             title: "Drafts",
             label: "9",
             icon: File,
-            href:"drafts",
-            variant: "ghost",
+            href:"/mail/drafts",
+            variant:pathname === "/mail/drafts" ? "default" : "ghost",
           },
           {
             title: "Sent",
             label: "",
             icon: Send,
-            href:"sent",
-            variant: "ghost",
+            href:"/mail/sent",
+            variant:pathname === "/mail/sent" ? "default" : "ghost",
           },
           {
             title: "Junk",
             label: "23",
             icon: ArchiveX,
-            href:"junk",
-            variant: "ghost",
+            href:"/mail/junk",
+            variant:pathname === "/mail/junk" ? "default" : "ghost",
           },
           {
             title: "Template",
             label: "",
             icon: BookTemplate,
-            href:"template",
-            variant: "ghost",
+            href:"/mail/template",
+            variant:pathname === "/mail/template" ? "default" : "ghost",
           },
         ]}
       />
@@ -153,15 +157,14 @@ const Nav: React.FC<NavProps> = ({
             title: "Trash",
             label: "",
             icon: Trash2,
-            href:"trash",
-            variant: "ghost",
+            href:"/trash",
+            variant: pathname === "/trash" ? "default" : "ghost",
           },
           {
             title: "Archive",
-            label: "",
             icon: Archive,
-            href:"archive",
-            variant: "ghost",
+            href:"/archive",
+            variant: pathname === "/archive" ? "default" : "ghost",
           },
         ]}
       />
@@ -204,6 +207,9 @@ const Nav: React.FC<NavProps> = ({
           },
         ]}
       />
+      {/* 
+      //MARK: User & Mode
+      */}
       <div
         className={cn(
           "absolute bottom-4 items-center justify-center",
