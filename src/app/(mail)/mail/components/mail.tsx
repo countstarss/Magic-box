@@ -190,7 +190,9 @@ export function Mail({
           />
         </ResizablePanel>
         <ResizableHandle withHandle />
-
+        {/* 
+        //MARK: ===========
+        */}
         <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
           <Tabs defaultValue="all">
             <div className="flex items-center px-4 py-2">
@@ -210,6 +212,12 @@ export function Mail({
                   className="text-zinc-600 dark:text-zinc-200"
                 >
                   Unread
+                </TabsTrigger>
+                <TabsTrigger
+                  value="importent"
+                  className="text-zinc-600 dark:text-zinc-200"
+                >
+                  Importent
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -237,6 +245,9 @@ export function Mail({
             </TabsContent>
           </Tabs>
         </ResizablePanel>
+        {/* 
+        //MARK: ===========
+        */}
         <ResizableHandle withHandle />
         {/* 
         //MARK: MailDisplay

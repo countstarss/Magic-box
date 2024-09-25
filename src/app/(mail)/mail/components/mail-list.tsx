@@ -16,8 +16,8 @@ export function MailList({ items }: MailListProps) {
   const [mail, setMail] = useMail()
 
   return (
-    <div className='flex flex-col h-screen'>
-      <ScrollArea className="flex-grow max-h-screen h-screen overflow-y-auto">
+    <div className='flex flex-col h-fit'>
+      <ScrollArea className="flex-grow max-h-screen h-screen overflow-y-auto pb-32">
         <div className="flex flex-col gap-2 p-4 pt-0">
           {items.map((item) => (
             // MARK: Mail item

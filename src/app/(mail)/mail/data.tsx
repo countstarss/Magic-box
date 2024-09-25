@@ -8,6 +8,9 @@ export const mails = [
     date: "2023-10-22T09:00:00",
     read: true,
     labels: ["meeting", "work", "important"],
+    tags:['draft','sent','junk'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "110e8400-e29b-11d4-a716-446655440000",
@@ -18,6 +21,9 @@ export const mails = [
     date: "2023-10-22T10:30:00",
     read: true,
     labels: ["work", "important"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "3e7c3f6d-bdf5-46ae-8d90-171300f27ae2",
@@ -28,6 +34,9 @@ export const mails = [
     date: "2023-04-10T11:45:00",
     read: true,
     labels: ["personal"],
+    tags:['draft','sent','junk'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "61c35085-72d7-42b4-8d62-738f700d4b92",
@@ -38,6 +47,9 @@ export const mails = [
     date: "2023-03-25T13:15:00",
     read: false,
     labels: ["work", "budget"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "8f7b5db9-d935-4e42-8e05-1f1d0a3dfb97",
@@ -48,6 +60,9 @@ export const mails = [
     date: "2023-03-10T15:00:00",
     read: false,
     labels: ["meeting", "work", "important"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "1f0f2c02-e299-40de-9b1d-86ef9e42126b",
@@ -58,6 +73,9 @@ export const mails = [
     date: "2023-02-15T16:30:00",
     read: true,
     labels: ["work"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "17c0a96d-4415-42b1-8b4f-764efab57f66",
@@ -68,6 +86,9 @@ export const mails = [
     date: "2023-01-28T17:45:00",
     read: false,
     labels: ["meeting", "work", "important"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "2f0130cb-39fc-44c4-bb3c-0a4337edaaab",
@@ -78,6 +99,9 @@ export const mails = [
     date: "2022-12-20T18:30:00",
     read: true,
     labels: ["personal"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "de305d54-75b4-431b-adb2-eb6b9e546014",
@@ -88,6 +112,9 @@ export const mails = [
     date: "2022-11-30T19:15:00",
     read: true,
     labels: ["work", "conference"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "7dd90c63-00f6-40f3-bd87-5060a24e8ee7",
@@ -98,6 +125,9 @@ export const mails = [
     date: "2022-11-05T20:30:00",
     read: false,
     labels: ["meeting", "work"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "99a88f78-3eb4-4d87-87b7-7b15a49a0a05",
@@ -108,6 +138,9 @@ export const mails = [
     date: "2022-10-22T09:30:00",
     read: false,
     labels: ["work"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
@@ -118,6 +151,9 @@ export const mails = [
     date: "2022-10-10T10:45:00",
     read: true,
     labels: ["meeting", "work"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "c1a0ecb4-2540-49c5-86f8-21e5ce79e4e6",
@@ -128,6 +164,9 @@ export const mails = [
     date: "2022-09-20T12:00:00",
     read: false,
     labels: ["meeting", "work", "important"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "ba54eefd-4097-4949-99f2-2a9ae4d1a836",
@@ -138,6 +177,9 @@ export const mails = [
     date: "2022-09-10T13:15:00",
     read: true,
     labels: ["personal", "travel"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "df09b6ed-28bd-4e0c-85a9-9320ec5179aa",
@@ -148,6 +190,9 @@ export const mails = [
     date: "2022-08-25T15:30:00",
     read: false,
     labels: ["meeting", "work"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "d67c1842-7f8b-4b4b-9be1-1b3b1ab4611d",
@@ -158,6 +203,9 @@ export const mails = [
     date: "2022-08-10T16:45:00",
     read: true,
     labels: ["work", "budget"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
   {
     id: "6c9a7f94-8329-4d70-95d3-51f68c186ae1",
@@ -168,6 +216,9 @@ export const mails = [
     date: "2022-07-28T17:30:00",
     read: false,
     labels: ["personal"],
+    tags:['draft','sent'],
+    isTrash:false,
+    isArchive:false
   },
 ]
 
