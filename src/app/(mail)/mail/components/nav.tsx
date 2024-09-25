@@ -35,6 +35,7 @@ import { MailList } from "./mail-list"
 import { type Mail } from "../data"
 import { useMail } from "../use-mail"
 import { NavItem } from "./navItem"
+import { ModeToggle } from "@/components/ui/mode-toggle"
 
 interface NavProps {
   // You can define any props needed here
@@ -79,7 +80,7 @@ const Nav: React.FC<NavProps> = ({
       }}
       className={cn(
         isCollapsed &&
-          "min-w-[50px] transition-all duration-300 ease-in-out"
+          "min-w-[50px] transition-all duration-300 ease-in-out relative"
       )}
     >
       <div
@@ -95,6 +96,7 @@ const Nav: React.FC<NavProps> = ({
       //MARK: TODO
       //TODO: 尝试把NAV放到最外层的layout，把不同的内容做成子路由，切换类别只切换内容
       //TODO: 尝试仍然保留右侧部分的内容，将其作为Layout，减少点击切换路由带来的延迟
+      //TODO: 
 
 
       
@@ -202,6 +204,30 @@ const Nav: React.FC<NavProps> = ({
           },
         ]}
       />
+      <div
+        className={cn(
+          "absolute bottom-4 items-center justify-center",
+          isCollapsed ? "px-5 h-[100px]" : "px-8 h-50"
+        )}
+      >
+        {
+          isCollapsed ?(
+            <div className='flex flex-col gap-4'>
+              <ModeToggle />
+              <h1 className='w-[35px] h-[35px] bg-black border-white border flex items-center justify-center'>User</h1>
+              {/* 
+              //MARK: TODO
+              //TODO: 这里做一个User的DropDown菜单
+              */}
+            </div>
+          ) : (
+            <div className='flex flex-row gap-8'>
+              <div className='w-[150px] h-[35px] bg-black border-1 flex items-center justify-center'>User</div>
+              <ModeToggle />
+            </div>
+          )
+        }
+      </div>
     </ResizablePanel>
   );
 };
