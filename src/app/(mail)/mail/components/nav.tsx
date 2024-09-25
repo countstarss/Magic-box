@@ -1,87 +1,209 @@
-"use client"
-
-import Link from "next/link"
-import { LucideIcon } from "lucide-react"
+import * as React from "react"
+import {
+  AlertCircle,
+  Archive,
+  ArchiveX,
+  File,
+  Inbox,
+  MessagesSquare,
+  Search,
+  Send,
+  ShoppingCart,
+  Trash2,
+  Users2,
+  BookTemplate
+} from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+import { Separator } from "@/components/ui/separator"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { AccountSwitcher } from "./account-switcher"
+import { MailDisplay } from "./mail-display"
+import { MailList } from "./mail-list"
+import { type Mail } from "../data"
+import { useMail } from "../use-mail"
+import { NavItem } from "./navItem"
 
 interface NavProps {
-  isCollapsed: boolean
-  links: {
-    title: string
-    label?: string
-    icon: LucideIcon
-    variant: "default" | "ghost"
+  // You can define any props needed here
+  accounts: {
+    label: string
+    email: string
+    icon: React.ReactNode
   }[]
+  mails: Mail[]
+  defaultLayout: number[] | undefined
+  defaultCollapsed?: boolean
+  navCollapsedSize: number
 }
 
-export function Nav({ links, isCollapsed }: NavProps) {
+const Nav: React.FC<NavProps> = ({
+  accounts,
+  mails,
+  defaultLayout = [20, 32, 48],
+  defaultCollapsed = false,
+  navCollapsedSize,
+}) => {
+  const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed)
+
   return (
-    <div
-      data-collapsed={isCollapsed}
-      className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2"
+    <ResizablePanel
+      defaultSize={defaultLayout[0]}
+      collapsedSize={navCollapsedSize}
+      collapsible={true}
+      minSize={15}
+      maxSize={20}
+      onCollapse={() => {
+        setIsCollapsed(true)
+        document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
+          true
+        )}`
+      }}
+      onResize={() => {
+        setIsCollapsed(false)
+        document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
+          false
+        )}`
+      }}
+      className={cn(
+        isCollapsed &&
+          "min-w-[50px] transition-all duration-300 ease-in-out"
+      )}
     >
-      <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-        {links.map((link, index) =>
-          isCollapsed ? (
-            <Tooltip key={index} delayDuration={0}>
-              <TooltipTrigger asChild>
-                <Link
-                  href="#"
-                  className={cn(
-                    buttonVariants({ variant: link.variant, size: "icon" }),
-                    "h-9 w-9",
-                    link.variant === "default" &&
-                      "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
-                  )}
-                >
-                  <link.icon className="h-4 w-4" />
-                  <span className="sr-only">{link.title}</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="flex items-center gap-4">
-                {link.title}
-                {link.label && (
-                  <span className="ml-auto text-muted-foreground">
-                    {link.label}
-                  </span>
-                )}
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <Link
-              key={index}
-              href="#"
-              className={cn(
-                buttonVariants({ variant: link.variant, size: "sm" }),
-                link.variant === "default" &&
-                  "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white",
-                "justify-start"
-              )}
-            >
-              <link.icon className="mr-2 h-4 w-4" />
-              {link.title}
-              {link.label && (
-                <span
-                  className={cn(
-                    "ml-auto",
-                    link.variant === "default" &&
-                      "text-background dark:text-white"
-                  )}
-                >
-                  {link.label}
-                </span>
-              )}
-            </Link>
-          )
+      <div
+        className={cn(
+          "flex h-[52px] items-center justify-center",
+          isCollapsed ? "h-[52px]" : "px-2"
         )}
-      </nav>
-    </div>
-  )
-}
+      >
+        <AccountSwitcher isCollapsed={isCollapsed} accounts={accounts} />
+      </div>
+      <Separator />
+      {/*
+      //MARK: TODO
+      //TODO: 尝试把NAV放到最外层的layout，把不同的内容做成子路由，切换类别只切换内容
+      //TODO: 尝试仍然保留右侧部分的内容，将其作为Layout，减少点击切换路由带来的延迟
+
+
+      
+      //MARK: NAV top
+      */}
+      <NavItem
+        isCollapsed={isCollapsed}
+        links={[
+          {
+            title: "Inbox",
+            label: "128",
+            icon: Inbox,
+            href:"inbox",
+            variant: "default",
+          },
+          {
+            title: "Drafts",
+            label: "9",
+            icon: File,
+            href:"drafts",
+            variant: "ghost",
+          },
+          {
+            title: "Sent",
+            label: "",
+            icon: Send,
+            href:"sent",
+            variant: "ghost",
+          },
+          {
+            title: "Junk",
+            label: "23",
+            icon: ArchiveX,
+            href:"junk",
+            variant: "ghost",
+          },
+          {
+            title: "Template",
+            label: "",
+            icon: BookTemplate,
+            href:"template",
+            variant: "ghost",
+          },
+        ]}
+      />
+      <Separator />
+      {/* 
+      MARK: NAV middle
+      */}
+      <NavItem
+        isCollapsed={isCollapsed}
+        links={[
+          {
+            title: "Trash",
+            label: "",
+            icon: Trash2,
+            href:"trash",
+            variant: "ghost",
+          },
+          {
+            title: "Archive",
+            label: "",
+            icon: Archive,
+            href:"archive",
+            variant: "ghost",
+          },
+        ]}
+      />
+      <Separator />
+      {/*
+      //MARK: NAV bottom
+      */}
+      <NavItem
+        isCollapsed={isCollapsed}
+        links={[
+          {
+            title: "Social",
+            label: "972",
+            icon: Users2,
+            variant: "ghost",
+          },
+          {
+            title: "Updates",
+            label: "342",
+            icon: AlertCircle,
+            variant: "ghost",
+          },
+          {
+            title: "Forums",
+            label: "128",
+            icon: MessagesSquare,
+            variant: "ghost",
+          },
+          {
+            title: "Shopping",
+            label: "8",
+            icon: ShoppingCart,
+            variant: "ghost",
+          },
+          {
+            title: "Promotions",
+            label: "21",
+            icon: Archive,
+            variant: "ghost",
+          },
+        ]}
+      />
+    </ResizablePanel>
+  );
+};
+
+export default Nav;

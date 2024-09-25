@@ -1,3 +1,4 @@
+// MARK: Mails
 export const mails = [
   {
     id: "6c84fb90-12c4-11e1-840d-7b25c5ee775a",
@@ -224,6 +225,7 @@ export const mails = [
 
 export type Mail = (typeof mails)[number]
 
+// MARK: Accounts
 export const accounts = [
   {
     label: "Alicia Koch",
@@ -265,6 +267,7 @@ export const accounts = [
 
 export type Account = (typeof accounts)[number]
 
+// MARK: Contacts
 export const contacts = [
   {
     name: "Emma Johnson",

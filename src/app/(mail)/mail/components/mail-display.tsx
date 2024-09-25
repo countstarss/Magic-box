@@ -71,7 +71,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
                 <span className="sr-only">Move to junk</span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Move to junk</TooltipContent>
+            <TooltipContent >Move to junk</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>

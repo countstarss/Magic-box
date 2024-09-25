@@ -37,6 +37,9 @@ export function MailList({ items }: MailListProps) {
               <div className="flex w-full flex-col gap-1">
                 <div className="flex items-center">
                   <div className="flex items-center gap-2">
+                    {/* 
+                    // MARK: Unread
+                    */}
                     <div className="font-semibold">{item.name}</div>
                     {!item.read && (
                       <span className="flex h-2 w-2 rounded-full bg-blue-600" />
@@ -60,6 +63,9 @@ export function MailList({ items }: MailListProps) {
               <div className="line-clamp-2 text-xs text-muted-foreground">
                 {item.text.substring(0, 300)}
               </div>
+              {/* 
+              // MARK: Attr Badge
+              */}
               {item.labels.length ? (
                 <div className="flex items-center gap-2">
                   {item.labels.map((label) => (

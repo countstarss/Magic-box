@@ -13,6 +13,7 @@ import {
   ShoppingCart,
   Trash2,
   Users2,
+  BookTemplate
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -33,9 +34,10 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { AccountSwitcher } from "./account-switcher"
 import { MailDisplay } from "./mail-display"
 import { MailList } from "./mail-list"
-import { Nav } from "./nav"
+import { NavItem } from "./navItem"
 import { type Mail } from "../data"
 import { useMail } from "../use-mail"
+import Nav from "./nav"
 
 interface MailProps {
   accounts: {
@@ -73,122 +75,13 @@ export function Mail({
         }}
         className="h-screen items-stretch"
       >
-        <ResizablePanel
-          defaultSize={defaultLayout[0]}
-          collapsedSize={navCollapsedSize}
-          collapsible={true}
-          minSize={15}
-          maxSize={20}
-          onCollapse={() => {
-            setIsCollapsed(true)
-            document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
-              true
-            )}`
-          }}
-          onResize={() => {
-            setIsCollapsed(false)
-            document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
-              false
-            )}`
-          }}
-          className={cn(
-            isCollapsed &&
-              "min-w-[50px] transition-all duration-300 ease-in-out"
-          )}
-        >
-          <div
-            className={cn(
-              "flex h-[52px] items-center justify-center",
-              isCollapsed ? "h-[52px]" : "px-2"
-            )}
-          >
-            <AccountSwitcher isCollapsed={isCollapsed} accounts={accounts} />
-          </div>
-          <Separator />
-          {/*
-          //MARK: NAV top
-          */}
-          <Nav
-            isCollapsed={isCollapsed}
-            links={[
-              {
-                title: "Inbox",
-                label: "128",
-                icon: Inbox,
-                variant: "default",
-              },
-              {
-                title: "Drafts",
-                label: "9",
-                icon: File,
-                variant: "ghost",
-              },
-              {
-                title: "Sent",
-                label: "",
-                icon: Send,
-                variant: "ghost",
-              },
-              {
-                title: "Junk",
-                label: "23",
-                icon: ArchiveX,
-                variant: "ghost",
-              },
-              {
-                title: "Trash",
-                label: "",
-                icon: Trash2,
-                variant: "ghost",
-              },
-              {
-                title: "Archive",
-                label: "",
-                icon: Archive,
-                variant: "ghost",
-              },
-            ]}
-          />
-          <Separator />
-          {/*
-          //MARK: NAV bottom
-          */}
-          <Nav
-            isCollapsed={isCollapsed}
-            links={[
-              {
-                title: "Social",
-                label: "972",
-                icon: Users2,
-                variant: "ghost",
-              },
-              {
-                title: "Updates",
-                label: "342",
-                icon: AlertCircle,
-                variant: "ghost",
-              },
-              {
-                title: "Forums",
-                label: "128",
-                icon: MessagesSquare,
-                variant: "ghost",
-              },
-              {
-                title: "Shopping",
-                label: "8",
-                icon: ShoppingCart,
-                variant: "ghost",
-              },
-              {
-                title: "Promotions",
-                label: "21",
-                icon: Archive,
-                variant: "ghost",
-              },
-            ]}
-          />
-        </ResizablePanel>
+        <Nav 
+            accounts={accounts}
+            mails={mails}
+            defaultLayout={defaultLayout}
+            defaultCollapsed={defaultCollapsed}
+            navCollapsedSize={4}
+        />
         <ResizableHandle withHandle />
         {/* 
         //MARK: ===========
@@ -196,6 +89,9 @@ export function Mail({
         <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
           <Tabs defaultValue="all">
             <div className="flex items-center px-4 py-2">
+              {/* 
+              //TODO: 在这里添加一个数据筛选，显示不同种类的mail数据。比如inbox，sent，junk
+              */}
               <h1 className="text-xl font-bold">Inbox</h1>
               {/* 
               //MARK: Tab: All | Unread
@@ -225,6 +121,10 @@ export function Mail({
 
             {/* 
             //MARK: Search
+            //TODO: Search是实现关键字搜索,添加一个筛选功能
+              -- 在Search尾部添加一个下拉箭头，里面有所有的mail具有的label
+              -- 可以单独设置某一个label一直高亮
+              -- 可以通过点击选择来筛选mail
             */}
             <div className="bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <form>
