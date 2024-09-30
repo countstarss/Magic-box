@@ -40,31 +40,13 @@ const Page: React.FC<PageProps> = ({
       <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
           <Tabs defaultValue="all">
             <div className="flex items-center px-4 py-2">
-              {/* 
-              //TODO: 在这里添加一个数据筛选，显示不同种类的mail数据。比如inbox，sent，junk
-              */}
               <h1 className="text-xl font-bold">Inbox</h1>
-              {/* 
-              //MARK: Tab: All | Unread
-              */}
               <TabsList className="ml-auto">
                 <TabsTrigger
                   value="all"
                   className="text-zinc-600 dark:text-zinc-200"
                 >
                   All mail
-                </TabsTrigger>
-                <TabsTrigger
-                  value="unread"
-                  className="text-zinc-600 dark:text-zinc-200"
-                >
-                  Unread
-                </TabsTrigger>
-                <TabsTrigger
-                  value="importent"
-                  className="text-zinc-600 dark:text-zinc-200"
-                >
-                  Importent
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -131,9 +113,6 @@ const Page: React.FC<PageProps> = ({
                   </div>
                 </ScrollArea>
               </div>
-            </TabsContent>
-            <TabsContent value="unread" className="m-0">
-              <MailList items={mails.filter((item) => !item.read)} />
             </TabsContent>
           </Tabs>
         </ResizablePanel>

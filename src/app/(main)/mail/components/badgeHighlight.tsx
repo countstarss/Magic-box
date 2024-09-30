@@ -8,7 +8,9 @@ interface MailListProps {
 
 export function MailList({ items }: MailListProps) {
   return (
-    <></>
+      <div>
+        
+      </div>
   )
 }
 
