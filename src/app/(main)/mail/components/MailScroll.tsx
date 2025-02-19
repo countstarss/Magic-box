@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input"
 import {
   ResizableHandle,
   ResizablePanel,
-  ResizablePanelGroup,
 } from "@/components/ui/resizable"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -20,13 +19,13 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import { type Mail } from "../../../../lib/data"
-import { MailList } from "./badgeHighlight"
 import { useMail } from "@/hooks/use-mail"
 import { MailDisplay } from "./mail-display"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { formatDistanceToNow } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { getBadgeVariantFromLabel } from "./badgeHighlight"
+import { usePathname } from "next/navigation"
 
 interface MailListProps {
   // You can define any props needed here
@@ -40,6 +39,7 @@ const MailScroll: React.FC<MailListProps> = ({
   defaultLayout = [20, 32, 48],
 }) => {
   const [mail, setMail] = useMail()
+  const pathName = usePathname()
 
   return (
     <>
@@ -50,7 +50,7 @@ const MailScroll: React.FC<MailListProps> = ({
               {/* 
               //TODO: 在这里添加一个数据筛选，显示不同种类的mail数据。比如inbox，sent，junk
               */}
-              <h1 className="text-xl font-bold">Inbox</h1>
+              <h1 className="text-xl font-bold">{pathName.split("/")[2] || "all mail"}</h1>
               {/* 
               //MARK: Tab: All | Unread
               */}

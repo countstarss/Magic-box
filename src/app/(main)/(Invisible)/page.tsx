@@ -16,12 +16,11 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { useMail } from "@/hooks/use-mail"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { formatDistanceToNow } from "date-fns"
-import { getBadgeVariantFromLabel, MailList } from "../mail/components/badgeHighlight"
 import { cookies } from "next/headers"
 import { Email } from "@/lib/data"
+import { usePathname } from "next/navigation"
+import InvisibleTitle from "@/components/invisible-title"
 
 interface PageProps {
   // You can define any props needed here
@@ -32,15 +31,17 @@ const Page: React.FC<PageProps> = ({
   mails
 }) => {
   
+  // NOTE: 使用这个应该是能让应用里边的宽度保持一致 不变化
   const layout = cookies().get("react-resizable-panels:layout:mail")
   const defaultLayout = layout ? JSON.parse(layout.value) : undefined
+  
   return (
     <>
     <ResizableHandle withHandle />
       <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
           <Tabs defaultValue="all">
             <div className="flex items-center px-4 py-2">
-              <h1 className="text-xl font-bold">Inbox</h1>
+              <InvisibleTitle />
               <TabsList className="ml-auto">
                 <TabsTrigger
                   value="all"
