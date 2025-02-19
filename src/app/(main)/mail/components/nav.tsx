@@ -43,7 +43,7 @@ interface NavProps {
 const Nav: React.FC<NavProps> = ({
   accounts,
   mails,
-  defaultLayout = [20, 32, 48],
+  defaultLayout = [16, 32, 48],
   defaultCollapsed = false,
   navCollapsedSize,
 }) => {
@@ -56,8 +56,8 @@ const Nav: React.FC<NavProps> = ({
       defaultSize={defaultLayout[0]}
       collapsedSize={navCollapsedSize}
       collapsible={true}
-      minSize={15}
-      maxSize={20}
+      minSize={16}
+      maxSize={16}
       onCollapse={() => {
         setIsCollapsed(true)
         document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
