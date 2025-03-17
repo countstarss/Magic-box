@@ -9,7 +9,8 @@ import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import {
   ResizableHandle,
-  ResizablePanel
+  ResizablePanel,
+  ResizablePanelGroup
 } from "@/components/ui/resizable"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -30,16 +31,23 @@ import { usePathname } from "next/navigation"
 
 interface MailListProps {
   defaultLayout: number[] | undefined
-  children?:React.ReactNode
+  children?: React.ReactNode
   folder?: string
+  layoutDirection?: "horizontal" | "vertical"
+  isVerticalLayout?: boolean
 }
 
 const MailScroll: React.FC<MailListProps> = ({
   defaultLayout = [20, 32, 48],
-  folder = "inbox"
+  folder = "inbox",
+  layoutDirection = "horizontal",
+  isVerticalLayout = false
 }) => {
   const { config, setConfig, markAsRead, getFilteredMails } = useMail();
   const pathname = usePathname();
+  
+  // 确定布局方向
+  const direction = layoutDirection === "vertical" || isVerticalLayout ? "vertical" : "horizontal";
   
   // 根据路径确定当前文件夹
   const currentFolder = React.useMemo(() => {
@@ -126,52 +134,69 @@ const MailScroll: React.FC<MailListProps> = ({
   const unreadMails = folderMails.filter(mail => !mail.read);
   const importantMails = folderMails.filter(mail => mail.labels.includes('important'));
 
+  // 计算滚动区域的高度
+  const scrollHeight = direction === "vertical" 
+    ? "h-[calc(50vh-8rem)]" // 垂直布局时，限制高度为视口高度的一半减去头部空间
+    : "h-[calc(100vh-10rem)]"; // 水平布局时，使用全部可用高度减去头部空间
+
+  // 邮件列表面板内容
+  const mailListPanel = (
+    <Tabs defaultValue="all">
+      <div className="flex items-center px-4 py-2">
+        <h1 className="text-xl font-bold capitalize">{currentFolder}</h1>
+        <TabsList className="ml-auto">
+          <TabsTrigger value="all">All mail</TabsTrigger>
+          <TabsTrigger value="unread">Unread</TabsTrigger>
+          <TabsTrigger value="important">Important</TabsTrigger>
+        </TabsList>
+      </div>
+      <Separator />
+      <div className="bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <form>
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search" className="pl-8" />
+          </div>
+        </form>
+      </div>
+      <TabsContent value="all" className="m-0">
+        <ScrollArea className={scrollHeight}>
+          {renderMailList(allMails)}
+        </ScrollArea>
+      </TabsContent>
+      <TabsContent value="unread" className="m-0">
+        <ScrollArea className={scrollHeight}>
+          {renderMailList(unreadMails)}
+        </ScrollArea>
+      </TabsContent>
+      <TabsContent value="important" className="m-0">
+        <ScrollArea className={scrollHeight}>
+          {renderMailList(importantMails)}
+        </ScrollArea>
+      </TabsContent>
+    </Tabs>
+  );
+
+  // 邮件显示面板内容
+  const mailDisplayPanel = (
+    <MailDisplay
+      mail={config.mails.find((item) => item.id === config.selected) || null}
+    />
+  );
+
   return (
-    <>
-      <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
-        <Tabs defaultValue="all">
-          <div className="flex items-center px-4 py-2">
-            <h1 className="text-xl font-bold capitalize">{currentFolder}</h1>
-            <TabsList className="ml-auto">
-              <TabsTrigger value="all">All mail</TabsTrigger>
-              <TabsTrigger value="unread">Unread</TabsTrigger>
-              <TabsTrigger value="important">Important</TabsTrigger>
-            </TabsList>
-          </div>
-          <Separator />
-          <div className="bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <form>
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search" className="pl-8" />
-              </div>
-            </form>
-          </div>
-          <TabsContent value="all" className="m-0">
-            <ScrollArea className="h-screen">
-              {renderMailList(allMails)}
-            </ScrollArea>
-          </TabsContent>
-          <TabsContent value="unread" className="m-0">
-            <ScrollArea className="h-screen">
-              {renderMailList(unreadMails)}
-            </ScrollArea>
-          </TabsContent>
-          <TabsContent value="important" className="m-0">
-            <ScrollArea className="h-screen">
-              {renderMailList(importantMails)}
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
+    <ResizablePanelGroup
+      direction={direction}
+      className="h-full"
+    >
+      <ResizablePanel defaultSize={direction === "vertical" ? 50 : 40} minSize={30}>
+        {mailListPanel}
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={defaultLayout[2]} minSize={30}>
-        <MailDisplay
-          mail={config.mails.find((item) => item.id === config.selected) || null}
-        />
+      <ResizablePanel defaultSize={direction === "vertical" ? 50 : 60} minSize={30}>
+        {mailDisplayPanel}
       </ResizablePanel>
-    </>
+    </ResizablePanelGroup>
   );
 };
 
