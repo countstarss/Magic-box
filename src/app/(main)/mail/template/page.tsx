@@ -59,7 +59,7 @@ const TemplatePage = () => {
   return (
     <>
       {/* Template List */}
-      <ResizablePanel defaultSize={30} minSize={20}>
+      <ResizablePanel defaultSize={30} minSize={20} className="border-l">
         <div className="h-full flex flex-col">
           <div className="p-4 border-b">
             <h2 className="text-lg font-semibold mb-4">Email Templates</h2>

@@ -29,6 +29,28 @@ export function useMail() {
     }))
   }
 
+  // 根据不同文件夹过滤邮件
+  const getFilteredMails = (folder: string) => {
+    switch(folder) {
+      case 'inbox':
+        return config.mails.filter(mail => 
+          !mail.isTrash && !mail.isArchive && !mail.tags.includes('draft') && !mail.tags.includes('junk')
+        );
+      case 'draft':
+        return config.mails.filter(mail => mail.tags.includes('draft'));
+      case 'sent':
+        return config.mails.filter(mail => mail.tags.includes('sent'));
+      case 'junk':
+        return config.mails.filter(mail => mail.tags.includes('junk'));
+      case 'trash':
+        return config.mails.filter(mail => mail.isTrash);
+      case 'archive':
+        return config.mails.filter(mail => mail.isArchive);
+      default:
+        return config.mails;
+    }
+  }
+
   useEffect(() => {
     async function fetchMails() {
       try {
@@ -63,6 +85,7 @@ export function useMail() {
     setConfig,
     loading,
     error,
-    markAsRead
+    markAsRead,
+    getFilteredMails
   }
 }
