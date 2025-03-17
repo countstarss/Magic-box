@@ -69,7 +69,7 @@ export function useMail() {
         filteredMails = config.mails;
     }
     
-    // 如果指定了分类参数，进一步过滤邮件
+    // NOTE: 如果指定了分类参数，进一步过滤邮件
     if (categoryParam) {
       const category = userCategories.find(cat => cat.id === categoryParam);
       if (category) {

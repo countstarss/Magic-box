@@ -177,6 +177,8 @@ export function removeCategory(categoryId: string) {
     prev.filter(cat => cat.id !== categoryId)
 }
 
+
+// NOTE: CategoryManager的过滤算法
 // 检查邮件是否匹配分类条件
 export function matchesCategory(mail: any, category: CategoryRule): boolean {
   return category.conditions.some(condition => {
