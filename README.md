@@ -66,3 +66,38 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - 获取每封邮件的AI分析洞见
 - 分析结果包括情感、优先级、摘要和行动项
 这个系统为您后续开发更复杂的邮件智能处理功能奠定了坚实基础
+
+
+
+=================================
+
+
+我已经成功地为您的项目引入了React Query，创建了必要的文件并提供了示例实现。下面是我实现的内容摘要：
+1. 添加了必要的依赖
+  @tanstack/react-query - 用于数据获取和缓存
+  @tanstack/react-query-devtools - 用于开发调试
+2. 创建了React Query核心配置
+  src/lib/query-client.ts - 配置全局查询客户端，设置默认选项如缓存时间和重试策略
+3. 实现了查询提供者
+  src/providers/query-provider.tsx - 提供了一个React组件，用于在应用程序中提供React Query功能，包括开发工具
+4. 实现了API服务层
+  src/lib/api/mail-service.ts - 创建了一个完整的API服务，包含了与邮件相关的所有API调用（获取、发送、更新等）
+5. 创建了React Query hooks
+  src/hooks/use-query-mail.ts - 实现了一系列自定义hooks，包装了API服务，提供了查询键管理和缓存失效策略
+6. 提供了一个实际示例
+  src/components/examples/mail-list-example.tsx - 创建了一个功能完整的示例组件，展示了如何使用React Query获取和操作邮件数据
+  src/app/query-demo/page.tsx - 创建了一个演示页面，以展示React Query的实际应用
+
+## 优势和特点
+- 模块化设计 - 每个功能都有明确的责任边界
+- 类型安全 - 完全利用TypeScript提供类型检查
+- 缓存管理 - 智能缓存和重新验证策略
+- 乐观更新 - 通过mutations处理乐观更新
+- 错误处理 - 内置错误处理和加载状态
+- 无缝集成 - 可以轻松集成到实际后端
+## 使用方法
+当您准备好后端时，只需要:
+- 更新API_BASE_URL指向您的实际API
+- 如有必要，调整API服务中的请求和响应处理
+- 其余部分（包括React组件和hooks）可以保持不变
+这个实现提供了一个可扩展的基础，用于构建具有高性能数据获取和状态管理的现代React应用程序。
