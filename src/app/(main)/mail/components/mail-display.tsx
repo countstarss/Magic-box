@@ -12,6 +12,7 @@ import {
   ReplyAll,
   Trash2,
 } from "lucide-react"
+import { toast } from "sonner"
 
 import {
   DropdownMenuContent,
@@ -43,6 +44,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Mail } from "../../../../lib/data"
+import { useMail } from "@/hooks/use-mail"
 
 interface MailDisplayProps {
   mail: Mail | null
@@ -50,6 +52,111 @@ interface MailDisplayProps {
 
 export function MailDisplay({ mail }: MailDisplayProps) {
   const today = new Date()
+  const { setConfig } = useMail()
+
+  // 归档邮件
+  const handleArchive = () => {
+    if (!mail) return
+    setConfig(prev => ({
+      ...prev,
+      mails: prev.mails.map(m => 
+        m.id === mail.id 
+          ? { ...m, folder: "archive" }
+          : m
+      )
+    }))
+    toast.success(`Email archived`, {
+      description: `"${mail.subject}" has been moved to archive`,
+      position: "bottom-right",
+    })
+  }
+
+  // 移到垃圾邮件
+  const handleMoveToJunk = () => {
+    if (!mail) return
+    setConfig(prev => ({
+      ...prev,
+      mails: prev.mails.map(m => 
+        m.id === mail.id 
+          ? { ...m, folder: "junk" }
+          : m
+      )
+    }))
+    toast.success(`Email moved to junk`, {
+      description: `"${mail.subject}" has been moved to junk folder`,
+      position: "bottom-right",
+    })
+  }
+
+  // 移到垃圾箱
+  const handleMoveToTrash = () => {
+    if (!mail) return
+    setConfig(prev => ({
+      ...prev,
+      mails: prev.mails.map(m => 
+        m.id === mail.id 
+          ? { ...m, folder: "trash" }
+          : m
+      )
+    }))
+    toast.success(`Email trashed`, {
+      description: `"${mail.subject}" has been moved to trash`,
+      position: "bottom-right",
+    })
+  }
+
+  // 标记为未读
+  const handleMarkAsUnread = () => {
+    if (!mail) return
+    setConfig(prev => ({
+      ...prev,
+      mails: prev.mails.map(m => 
+        m.id === mail.id 
+          ? { ...m, read: false }
+          : m
+      )
+    }))
+    toast.success(`Marked as unread`, {
+      description: `"${mail.subject}" has been marked as unread`,
+      position: "bottom-right",
+    })
+  }
+
+  // 添加星标
+  const handleStarThread = () => {
+    if (!mail) return
+    const hasLabel = mail.labels.includes("important")
+    
+    setConfig(prev => ({
+      ...prev,
+      mails: prev.mails.map(m => 
+        m.id === mail.id 
+          ? { 
+              ...m, 
+              labels: hasLabel 
+                ? m.labels.filter(label => label !== "important") 
+                : [...m.labels, "important"] 
+            }
+          : m
+      )
+    }))
+    
+    toast.success(hasLabel ? `Star removed` : `Starred`, {
+      description: hasLabel 
+        ? `Star removed from "${mail.subject}"` 
+        : `"${mail.subject}" has been starred`,
+      position: "bottom-right",
+    })
+  }
+
+  // 处理回复邮件
+  const handleReply = () => {
+    if (!mail) return
+    toast.info(`Replying`, {
+      description: `Composing reply to "${mail.subject}"`,
+      position: "bottom-right",
+    })
+  }
 
   return (
     <div className="flex h-full flex-col">
@@ -57,7 +164,12 @@ export function MailDisplay({ mail }: MailDisplayProps) {
         <div className="flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!mail}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                disabled={!mail}
+                onClick={handleArchive}
+              >
                 <Archive className="h-4 w-4" />
                 <span className="sr-only">Archive</span>
               </Button>
@@ -66,7 +178,12 @@ export function MailDisplay({ mail }: MailDisplayProps) {
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!mail}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                disabled={!mail}
+                onClick={handleMoveToJunk}
+              >
                 <ArchiveX className="h-4 w-4" />
                 <span className="sr-only">Move to junk</span>
               </Button>
@@ -75,7 +192,12 @@ export function MailDisplay({ mail }: MailDisplayProps) {
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!mail}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                disabled={!mail}
+                onClick={handleMoveToTrash}
+              >
                 <Trash2 className="h-4 w-4" />
                 <span className="sr-only">Move to trash</span>
               </Button>
@@ -100,6 +222,13 @@ export function MailDisplay({ mail }: MailDisplayProps) {
                     <Button
                       variant="ghost"
                       className="justify-start font-normal"
+                      onClick={() => {
+                        if (!mail) return
+                        toast.success(`Email snoozed`, {
+                          description: `"${mail.subject}" will return later today`,
+                          position: "bottom-right",
+                        })
+                      }}
                     >
                       Later today{" "}
                       <span className="ml-auto text-muted-foreground">
@@ -109,6 +238,13 @@ export function MailDisplay({ mail }: MailDisplayProps) {
                     <Button
                       variant="ghost"
                       className="justify-start font-normal"
+                      onClick={() => {
+                        if (!mail) return
+                        toast.success(`Email snoozed`, {
+                          description: `"${mail.subject}" will return tomorrow`,
+                          position: "bottom-right",
+                        })
+                      }}
                     >
                       Tomorrow
                       <span className="ml-auto text-muted-foreground">
@@ -118,6 +254,13 @@ export function MailDisplay({ mail }: MailDisplayProps) {
                     <Button
                       variant="ghost"
                       className="justify-start font-normal"
+                      onClick={() => {
+                        if (!mail) return
+                        toast.success(`Email snoozed`, {
+                          description: `"${mail.subject}" will return this weekend`,
+                          position: "bottom-right",
+                        })
+                      }}
                     >
                       This weekend
                       <span className="ml-auto text-muted-foreground">
@@ -127,6 +270,13 @@ export function MailDisplay({ mail }: MailDisplayProps) {
                     <Button
                       variant="ghost"
                       className="justify-start font-normal"
+                      onClick={() => {
+                        if (!mail) return
+                        toast.success(`Email snoozed`, {
+                          description: `"${mail.subject}" will return next week`,
+                          position: "bottom-right",
+                        })
+                      }}
                     >
                       Next week
                       <span className="ml-auto text-muted-foreground">
@@ -146,7 +296,12 @@ export function MailDisplay({ mail }: MailDisplayProps) {
         <div className="ml-auto flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!mail}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                disabled={!mail}
+                onClick={handleReply}
+              >
                 <Reply className="h-4 w-4" />
                 <span className="sr-only">Reply</span>
               </Button>
@@ -155,7 +310,18 @@ export function MailDisplay({ mail }: MailDisplayProps) {
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!mail}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                disabled={!mail}
+                onClick={() => {
+                  if (!mail) return
+                  toast.info(`Reply all`, {
+                    description: `Composing reply to all recipients of "${mail.subject}"`,
+                    position: "bottom-right",
+                  })
+                }}
+              >
                 <ReplyAll className="h-4 w-4" />
                 <span className="sr-only">Reply all</span>
               </Button>
@@ -164,7 +330,18 @@ export function MailDisplay({ mail }: MailDisplayProps) {
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!mail}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                disabled={!mail}
+                onClick={() => {
+                  if (!mail) return
+                  toast.info(`Forward`, {
+                    description: `Forwarding "${mail.subject}"`,
+                    position: "bottom-right",
+                  })
+                }}
+              >
                 <Forward className="h-4 w-4" />
                 <span className="sr-only">Forward</span>
               </Button>
@@ -181,10 +358,30 @@ export function MailDisplay({ mail }: MailDisplayProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Mark as unread</DropdownMenuItem>
-            <DropdownMenuItem>Star thread</DropdownMenuItem>
-            <DropdownMenuItem>Add label</DropdownMenuItem>
-            <DropdownMenuItem>Mute thread</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleMarkAsUnread}>
+              Mark as unread
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleStarThread}>
+              {mail?.labels.includes("important") ? "Remove star" : "Star thread"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              if (!mail) return
+              toast.info(`Adding label`, {
+                description: `Choose a label for "${mail.subject}"`,
+                position: "bottom-right",
+              })
+            }}>
+              Add label
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              if (!mail) return
+              toast.success(`Thread muted`, {
+                description: `"${mail.subject}" has been muted`,
+                position: "bottom-right",
+              })
+            }}>
+              Mute thread
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -237,7 +434,13 @@ export function MailDisplay({ mail }: MailDisplayProps) {
                     thread
                   </Label>
                   <Button
-                    onClick={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      toast.success(`Reply sent`, {
+                        description: `Your reply to "${mail.subject}" has been sent`,
+                        position: "bottom-right",
+                      })
+                    }}
                     size="sm"
                     className="ml-auto"
                   >
