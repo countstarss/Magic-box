@@ -209,16 +209,24 @@ const Nav: React.FC<NavProps> = ({
           isCollapsed ?(
             <div className='flex flex-col gap-4'>
               <ModeToggle />
-              <h1 className='w-[35px] h-[35px] bg-black border-white border flex items-center justify-center'>User</h1>
-              {/* 
-              //MARK: TODO
-              //TODO: 这里做一个User的DropDown菜单
-              */}
+              <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center overflow-hidden">
+                <span className="font-medium text-sm">LK</span>
+              </div>
             </div>
           ) : (
-            <div className='flex flex-row gap-8'>
-              <div className='w-[150px] h-[35px] bg-black border-1 flex items-center justify-center'>User</div>
-              <ModeToggle />
+            <div className='flex flex-col gap-4 w-full'>
+              <div className='flex flex-row justify-between w-full'>
+                <div className="flex items-center space-x-2 bg-muted rounded-lg p-2 w-full">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="font-medium text-xs text-primary">LK</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">Luke</span>
+                    <span className="text-xs text-muted-foreground">luke@wizmail.com</span>
+                  </div>
+                </div>
+                <ModeToggle />
+              </div>
             </div>
           )
         }
