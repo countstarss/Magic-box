@@ -200,15 +200,15 @@ const Nav: React.FC<NavProps> = ({
       title: "Trash",
       label: "",
       icon: Trash2,
-      variant: isPathActive("/mail/trash") ? "default" : "ghost",
-      href: "/mail/trash",
+      variant: isPathActive("/mail/storage/trash") ? "default" : "ghost",
+      href: "/mail/storage/trash",
     },
     {
       title: "Archive",
       label: "",
       icon: Archive,
-      variant: isPathActive("/mail/archive") ? "default" : "ghost",
-      href: "/mail/archive",
+      variant: isPathActive("/mail/storage/archive") ? "default" : "ghost",
+      href: "/mail/storage/archive",
     },
   ];
 

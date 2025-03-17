@@ -127,6 +127,26 @@ export function useMail() {
     return counts;
   }, [config.mails, userCategories]);
 
+  // 清空垃圾箱
+  const emptyTrash = useCallback(() => {
+    setConfig(prev => ({
+      ...prev,
+      mails: prev.mails.filter(mail => !mail.isTrash)
+    }));
+    
+    // 如果后端有API，可以在这里调用
+    // async function deleteTrashFromServer() {
+    //   try {
+    //     await fetch('/api/mail/trash', {
+    //       method: 'DELETE'
+    //     });
+    //   } catch (error) {
+    //     console.error('Error emptying trash:', error);
+    //   }
+    // }
+    // deleteTrashFromServer();
+  }, [setConfig]);
+
   useEffect(() => {
     async function fetchMails() {
       try {
@@ -172,6 +192,7 @@ export function useMail() {
     getMailAnalysis,
     getCategoryCounts,
     selectedMail,
-    userCategories
+    userCategories,
+    emptyTrash
   }
 }
