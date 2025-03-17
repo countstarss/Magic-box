@@ -1,24 +1,13 @@
 import React from 'react';
-import { mails } from '@/lib/data';
 import { cookies } from 'next/headers';
 import MailScroll from '../components/MailScroll';
-import { useFilteredEmails } from '@/hooks/use-filtered-mail';
 
-
-interface DraftsProps {
-  // You can define any props needed here
-}
-
-const Draft: React.FC<DraftsProps> = ({
-  
-}) => {
-
+const Draft: React.FC = () => {
   const layout = cookies().get("react-resizable-panels:layout:mail")
   const defaultLayout = layout ? JSON.parse(layout.value) : undefined
-  const filteredEmails = useFilteredEmails(mails,"draft")
 
   return (
-    <MailScroll mails={filteredEmails} defaultLayout={defaultLayout}/>
+    <MailScroll defaultLayout={defaultLayout} folder="draft" />
   );
 };
 

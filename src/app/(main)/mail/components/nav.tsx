@@ -208,14 +208,16 @@ const Nav: React.FC<NavProps> = ({
         {
           isCollapsed ?(
             <div className='flex flex-col gap-4'>
-              <ModeToggle />
+              <div className="w-10 h-10 flex items-center justify-center">
+                <ModeToggle iconSize="1rem" />
+              </div>
               <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center overflow-hidden">
                 <span className="font-medium text-sm">LK</span>
               </div>
             </div>
           ) : (
             <div className='flex flex-col gap-4 w-full'>
-              <div className='flex flex-row justify-between w-full'>
+              <div className='flex flex-row justify-between w-full items-center'>
                 <div className="flex items-center space-x-2 bg-muted rounded-lg p-2 w-full">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <span className="font-medium text-xs text-primary">LK</span>
@@ -225,7 +227,9 @@ const Nav: React.FC<NavProps> = ({
                     <span className="text-xs text-muted-foreground">luke@wizmail.com</span>
                   </div>
                 </div>
-                <ModeToggle />
+                <div className="ml-2">
+                  <ModeToggle iconSize="1rem" className="h-9 w-9" />
+                </div>
               </div>
             </div>
           )
