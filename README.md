@@ -101,3 +101,21 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - 如有必要，调整API服务中的请求和响应处理
 - 其余部分（包括React组件和hooks）可以保持不变
 这个实现提供了一个可扩展的基础，用于构建具有高性能数据获取和状态管理的现代React应用程序。
+
+
+
+
+
+-----------------------------
+
+我已经为你添加了以下 Gmail API 路由：
+GET /api/gmail/[id] - 获取邮件详情
+POST /api/gmail/[id]/labels - 修改邮件标签
+POST /api/gmail/[id]/trash - 删除邮件 (移动到垃圾箱)
+POST /api/gmail/[id]/archive - 归档邮件
+POST /api/gmail/[id]/read - 标记邮件为已读
+POST /api/gmail/[id]/unread - 标记邮件为未读
+你可以根据你的应用需求，在 React 组件中调用这些 API 路由，实现更丰富的邮件操作功能。 记得处理 API 响应中的 data.error 情况，以便更好地处理错误。
+
+
+

@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import { PrismaClient } from "@prisma/client";
+import { google } from 'googleapis';
 
 const prisma = new PrismaClient();
 
@@ -17,6 +18,11 @@ export const {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      authorization: {
+        params: {
+          scope: 'openid email profile https://mail.google.com/',
+        },
+      },
     }),
     EmailProvider({
       server: process.env.EMAIL_SERVER || "",
@@ -31,7 +37,7 @@ export const {
       }
       return session;
     },
-    async signIn({ user }) {
+    async signIn({ user, account, profile }) {
       // Check if user exists in DB
       let dbUser = await prisma.user.findUnique({
         where: { email: user.email as string },
@@ -45,6 +51,11 @@ export const {
             name: user.name || null,
           },
         });
+      }
+
+      // Add Google API Access Token to the user object
+      if (account?.access_token) {
+        (user as any).accessToken = account.access_token;
       }
       
       return true;
