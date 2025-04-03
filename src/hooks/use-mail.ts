@@ -1,6 +1,6 @@
 import { atom, useAtom } from "jotai"
 import { useCallback, useEffect, useState } from "react"
-import { Mail, mails as defaultMails } from "@/lib/data"
+import { Mail, mails as defaultMails, Email, MailCategory } from "@/lib/data"
 import { useSearchParams } from "next/navigation"
 import { userCategoriesAtom, matchesCategory } from "@/lib/user-categories"
 import { analyzeMailWithOpenAI, type AIMailAnalysisResult } from "@/lib/ai-mail-analysis"
@@ -12,13 +12,16 @@ type Config = {
   analysisResults: Record<string, AIMailAnalysisResult>
   // Gmail 认证状态
   gmailAuthorized: boolean
+  // 当前选中的文件夹
+  currentFolder: string
 }
 
 const configAtom = atom<Config>({
   selected: null,
   mails: defaultMails,
   analysisResults: {},
-  gmailAuthorized: false
+  gmailAuthorized: false,
+  currentFolder: 'inbox'
 })
 
 export function useMail() {
@@ -32,6 +35,14 @@ export function useMail() {
   const categoryParam = searchParams.get("category")
   // 检查是否有Gmail授权成功标志
   const gmailSuccess = searchParams?.get("success") === "gmail_connected"
+
+  // 设置当前文件夹
+  const setCurrentFolder = useCallback((folder: string) => {
+    setConfig(prev => ({
+      ...prev,
+      currentFolder: folder
+    }))
+  }, [setConfig])
 
   // 更新邮件已读状态的函数
   const markAsRead = useCallback((mailId: string) => {
@@ -60,23 +71,40 @@ export function useMail() {
     let filteredMails = [];
     switch(folder) {
       case 'inbox':
+        // 收件箱：不在垃圾箱、归档中、不是草稿，且在category中包含inbox
         filteredMails = config.mails.filter(mail => 
-          !mail.isTrash && !mail.isArchive && !mail.tags.includes('draft') && !mail.tags.includes('junk')
+          !mail.isTrash && 
+          !mail.isArchive && 
+          !mail.isDraft &&
+          mail.category.includes(MailCategory.Inbox)
         );
         break;
       case 'draft':
-        filteredMails = config.mails.filter(mail => mail.tags.includes('draft'));
+        // 草稿：isDraft为true的邮件
+        filteredMails = config.mails.filter(mail => mail.isDraft);
         break;
       case 'sent':
-        filteredMails = config.mails.filter(mail => mail.tags.includes('sent'));
+        // 已发送：category中包含sent，且不在垃圾箱或归档中
+        filteredMails = config.mails.filter(mail => 
+          mail.category.includes(MailCategory.Sent) && 
+          !mail.isTrash && 
+          !mail.isArchive
+        );
         break;
       case 'junk':
-        filteredMails = config.mails.filter(mail => mail.tags.includes('junk'));
+        // 垃圾邮件：category中包含junk，且不在垃圾箱或归档中
+        filteredMails = config.mails.filter(mail => 
+          mail.category.includes(MailCategory.Junk) && 
+          !mail.isTrash && 
+          !mail.isArchive
+        );
         break;
       case 'trash':
+        // 垃圾箱：仅显示isTrash为true的邮件
         filteredMails = config.mails.filter(mail => mail.isTrash);
         break;
       case 'archive':
+        // 归档：仅显示isArchive为true的邮件
         filteredMails = config.mails.filter(mail => mail.isArchive);
         break;
       default:
@@ -123,14 +151,17 @@ export function useMail() {
     return config.analysisResults[mailId] || null;
   }, [config.analysisResults]);
 
-  // 按类别计数邮件
+  // 获取特定类别的邮件数量，用于显示标记
   const getCategoryCounts = useCallback(() => {
     const counts: Record<string, number> = {};
     
     userCategories.forEach(category => {
-      // 只在收件箱中计数
+      // 只在收件箱中计数，过滤掉垃圾箱、归档或草稿中的邮件
       const inboxMails = config.mails.filter(mail => 
-        !mail.isTrash && !mail.isArchive && !mail.tags.includes('draft') && !mail.tags.includes('junk')
+        !mail.isTrash && 
+        !mail.isArchive && 
+        !mail.isDraft &&
+        mail.category.includes(MailCategory.Inbox)
       );
       
       counts[category.id] = inboxMails.filter(mail => 
@@ -161,7 +192,7 @@ export function useMail() {
     // deleteTrashFromServer();
   }, [setConfig]);
 
-  // 检查 Gmail 授权状态
+  // MARK: 检查 Gmail 授权
   const checkGmailAuth = useCallback(async () => {
     try {
       const response = await fetch('/api/gmail');
@@ -429,6 +460,8 @@ export function useMail() {
     fetchGmailMessages,
     checkGmailAuth,
     isGmailAuthorized: config.gmailAuthorized,
-    getMailById
+    getMailById,
+    setCurrentFolder,
+    currentFolder: config.currentFolder
   }
 }

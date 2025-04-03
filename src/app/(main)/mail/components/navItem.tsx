@@ -1,24 +1,24 @@
 "use client"
 
-import Link from "next/link"
-import { LucideIcon } from "lucide-react"
-
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import React from "react"
 
 interface NavProps {
   isCollapsed: boolean
   links: {
     title: string
     label?: string
-    icon: LucideIcon
+    icon: React.ComponentType<{ className?: string }>
     href?: string
     variant?: "default" | "ghost"
+    isActive?: boolean
+    onClick?: () => void
   }[]
 }
 
@@ -33,18 +33,19 @@ export function NavItem({ links, isCollapsed }: NavProps) {
           isCollapsed ? (
             <Tooltip key={index} delayDuration={0}>
               <TooltipTrigger asChild>
-                <Link
-                  href={`${link.href}`}
+                <Button
+                  variant={link.variant || "ghost"}
+                  size="icon"
                   className={cn(
-                    buttonVariants({ variant: link.variant, size: "icon" }),
                     "h-9 w-9",
-                    link.variant === "default" &&
+                    (link.variant === "default" || link.isActive) &&
                       "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
                   )}
+                  onClick={link.onClick}
                 >
-                  <link.icon className="h-4 w-4" />
+                  {React.createElement(link.icon, { className: "h-4 w-4" })}
                   <span className="sr-only">{link.title}</span>
-                </Link>
+                </Button>
               </TooltipTrigger>
               <TooltipContent side="right" className="flex items-center gap-4">
                 {link.title}
@@ -62,17 +63,18 @@ export function NavItem({ links, isCollapsed }: NavProps) {
 
           ) : (
 
-            <Link
+            <Button
               key={index}
-              href={`${link.href}`}
+              variant={link.variant || "ghost"}
+              size="lg"
               className={cn(
-                buttonVariants({ variant: link.variant, size: "lg" }),
-                link.variant === "default" &&
+                (link.variant === "default" || link.isActive) &&
                   "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white",
                 "justify-start"
               )}
+              onClick={link.onClick}
             >
-              <link.icon className="mr-2 h-4 w-4" />
+              {React.createElement(link.icon, { className: "mr-2 h-4 w-4" })}
               {link.title}
               {link.label && (
                 <span
@@ -85,7 +87,7 @@ export function NavItem({ links, isCollapsed }: NavProps) {
                   {link.label}
                 </span>
               )}
-            </Link>
+            </Button>
           )
         )}
       </nav>

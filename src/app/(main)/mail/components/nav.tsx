@@ -1,6 +1,5 @@
 "use client";
 import * as React from "react";
-import Link from "next/link";
 import {
   Archive,
   ArchiveX,
@@ -23,6 +22,7 @@ import { useAtom } from "jotai";
 import { userCategoriesAtom } from "@/lib/user-categories";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { IconByName } from "./IconByName";
+import { NavItem } from "./navItem";
 
 import {
   Dialog,
@@ -57,55 +57,6 @@ interface NavProps {
   onCollapsedChange?: (collapsed: boolean) => void;
 }
 
-interface NavItemProps {
-  isCollapsed: boolean;
-  links: NavLinkItem[];
-}
-
-function NavItem({ isCollapsed, links }: NavItemProps) {
-  return (
-    <div
-      data-collapsed={isCollapsed}
-      className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2"
-    >
-      <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-        {links.map((link, index) => (
-          <Link
-            key={index}
-            href={link.href || "#"}
-            onClick={link.onClick}
-            className={cn(
-              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-              link.variant === "default" && "bg-accent text-accent-foreground",
-              link.isActive && "bg-accent text-accent-foreground",
-              isCollapsed ? "h-10 w-10 justify-center" : "w-full justify-start"
-            )}
-          >
-            <link.icon
-              className={cn(isCollapsed ? "h-5 w-5" : "h-4 w-4 mr-2")}
-            />
-            {!isCollapsed && (
-              <>
-                <span>{link.title}</span>
-                {link.label && (
-                  <span
-                    className={cn(
-                      "ml-auto",
-                      link.variant === "default" && "text-background"
-                    )}
-                  >
-                    {link.label}
-                  </span>
-                )}
-              </>
-            )}
-          </Link>
-        ))}
-      </nav>
-    </div>
-  );
-}
-
 const Nav: React.FC<NavProps> = ({
   accounts,
   mails,
@@ -116,7 +67,7 @@ const Nav: React.FC<NavProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
   const [userCategories] = useAtom(userCategoriesAtom);
-  const { getCategoryCounts } = useMail();
+  const { getCategoryCounts, setCurrentFolder, currentFolder } = useMail();
   const categoryCounts = getCategoryCounts();
   const [isManageOpen, setIsManageOpen] = React.useState(false);
 
@@ -144,53 +95,35 @@ const Nav: React.FC<NavProps> = ({
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  // 检查路径是否匹配
-  const isPathActive = (path: string) => {
-    // 精确匹配路径，确保只在完全匹配时返回true
-    if (path === "/mail" && pathname === "/mail") {
-      return true;
-    }
-
-    // 对于子路径，确保路径完全匹配或是其子路径
-    if (path !== "/mail" && pathname.startsWith(path)) {
-      return true;
-    }
-
-    return false;
-  };
-
   // 主要链接数据
   const mainLinks: NavLinkItem[] = [
     {
       title: "Inbox",
       label: "",
       icon: Inbox,
-      variant:
-        isPathActive("/mail") && !pathname.includes("/mail/")
-          ? "default"
-          : "ghost",
-      href: "/mail",
+      variant: currentFolder === 'inbox' ? "default" : "ghost",
+      onClick: () => setCurrentFolder('inbox'),
     },
     {
       title: "Drafts",
       label: "",
       icon: File,
-      variant: isPathActive("/mail/draft") ? "default" : "ghost",
-      href: "/mail/draft",
+      variant: currentFolder === 'draft' ? "default" : "ghost",
+      onClick: () => setCurrentFolder('draft'),
     },
     {
       title: "Sent",
       label: "",
       icon: Send,
-      variant: isPathActive("/mail/sent") ? "default" : "ghost",
-      href: "/mail/sent",
+      variant: currentFolder === 'sent' ? "default" : "ghost",
+      onClick: () => setCurrentFolder('sent'),
     },
     {
       title: "Junk",
       label: "",
       icon: ArchiveX,
-      variant: isPathActive("/mail/junk") ? "default" : "ghost",
-      href: "/mail/junk",
+      variant: currentFolder === 'junk' ? "default" : "ghost",
+      onClick: () => setCurrentFolder('junk'),
     },
   ];
 
@@ -200,15 +133,15 @@ const Nav: React.FC<NavProps> = ({
       title: "Trash",
       label: "",
       icon: Trash2,
-      variant: isPathActive("/mail/storage/trash") ? "default" : "ghost",
-      href: "/mail/storage/trash",
+      variant: currentFolder === 'trash' ? "default" : "ghost",
+      onClick: () => setCurrentFolder('trash'),
     },
     {
       title: "Archive",
       label: "",
       icon: Archive,
-      variant: isPathActive("/mail/storage/archive") ? "default" : "ghost",
-      href: "/mail/storage/archive",
+      variant: currentFolder === 'archive' ? "default" : "ghost",
+      onClick: () => setCurrentFolder('archive'),
     },
   ];
 
@@ -322,20 +255,22 @@ const Nav: React.FC<NavProps> = ({
             isCollapsed ? "flex flex-col items-center" : "justify-start px-2"
           )}
         >
-          <Link
-            href="/mail/compose"
+          <Button
+            variant="default"
             className={cn(
               "rounded-md bg-primary text-primary-foreground shadow hover:bg-primary/90 transition-all",
               isCollapsed
                 ? "w-10 h-10 p-0 flex items-center justify-center"
                 : "w-full px-4 py-3 flex items-center justify-start"
             )}
+            onClick={() => router.push('/mail/compose')}
           >
             <PenBox className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
             {!isCollapsed && <span className="font-medium">Compose</span>}
-          </Link>
+          </Button>
         </div>
       </div>
+
       <div className="mb-2 flex-1 overflow-auto">
         <span
           className={cn(

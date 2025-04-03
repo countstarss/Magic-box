@@ -25,7 +25,7 @@ export default function MailPage({
           </AlertDescription>
         </Alert>
       )}
-      <MailScroll defaultLayout={defaultLayout} folder="inbox" />
+      <MailScroll defaultLayout={defaultLayout} />
     </>
   );
 }

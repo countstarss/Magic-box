@@ -30,34 +30,22 @@ import { AnimatePresence, motion } from "framer-motion"
 import { usePathname } from "next/navigation"
 
 interface MailListProps {
-  defaultLayout: number[] | undefined
+  defaultLayout?: number[]
   children?: React.ReactNode
-  folder?: string
   layoutDirection?: "horizontal" | "vertical"
   isVerticalLayout?: boolean
 }
 
 const MailScroll: React.FC<MailListProps> = ({
   defaultLayout = [20, 32, 48],
-  folder = "inbox",
   layoutDirection = "horizontal",
   isVerticalLayout = false
 }) => {
-  const { config, setConfig, markAsRead, getFilteredMails } = useMail();
+  const { config, setConfig, markAsRead, getFilteredMails, currentFolder } = useMail();
   const pathname = usePathname();
   
   // 确定布局方向
   const direction = layoutDirection === "vertical" || isVerticalLayout ? "vertical" : "horizontal";
-  
-  // 根据路径确定当前文件夹
-  const currentFolder = React.useMemo(() => {
-    if (pathname.includes('/draft')) return 'draft';
-    if (pathname.includes('/sent')) return 'sent';
-    if (pathname.includes('/junk')) return 'junk';
-    if (pathname.includes('/trash')) return 'trash';
-    if (pathname.includes('/archive')) return 'archive';
-    return 'inbox';
-  }, [pathname]);
 
   // 获取当前文件夹的邮件
   const folderMails = React.useMemo(() => 
@@ -139,11 +127,14 @@ const MailScroll: React.FC<MailListProps> = ({
     ? "h-[calc(50vh-8rem)]" // 垂直布局时，限制高度为视口高度的一半减去头部空间
     : "h-[calc(100vh-10rem)]"; // 水平布局时，使用全部可用高度减去头部空间
 
+  // 获取当前文件夹的标题（首字母大写）
+  const folderTitle = currentFolder.charAt(0).toUpperCase() + currentFolder.slice(1);
+
   // 邮件列表面板内容
   const mailListPanel = (
     <Tabs defaultValue="all">
       <div className="flex items-center px-4 py-2">
-        <h1 className="text-xl font-bold capitalize">{currentFolder}</h1>
+        <h1 className="text-xl font-bold capitalize">{folderTitle}</h1>
         <TabsList className="ml-auto">
           <TabsTrigger value="all">All mail</TabsTrigger>
           <TabsTrigger value="unread">Unread</TabsTrigger>
