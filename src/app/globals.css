@@ -40,6 +40,7 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -72,6 +73,7 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -79,30 +81,43 @@ body {
 
 /* 滚动条整体的宽度和高度 */
 ::-webkit-scrollbar {
-  width: 12px; /* 垂直滚动条的宽度 */
-  height: 12px; /* 水平滚动条的高度 */
+  width: 12px;
+  /* 垂直滚动条的宽度 */
+  height: 12px;
+  /* 水平滚动条的高度 */
 }
 
 /* 滚动条的滑块部分 */
 ::-webkit-scrollbar-thumb {
-  background-color: #616161; /* 滑块颜色 */
-  border-radius: 10px; /* 滑块的圆角 */
-  border: 3px solid transparent; /* 滑块与边缘的间距 */
-  background-clip: content-box; /* 确保滑块的边距显示效果 */
+  background-color: #616161;
+  /* 滑块颜色 */
+  border-radius: 10px;
+  /* 滑块的圆角 */
+  border: 3px solid transparent;
+  /* 滑块与边缘的间距 */
+  background-clip: content-box;
+  /* 确保滑块的边距显示效果 */
 }
 
 /* 鼠标悬停在滑块时的效果 */
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #555; /* 悬停时滑块的颜色 */
+  background-color: #555;
+  /* 悬停时滑块的颜色 */
 }
 
 /* 滚动条的背景（轨道） */
 ::-webkit-scrollbar-track {
-  background: #1f1f1f; /* 轨道的背景颜色 */
+  background: #1f1f1f;
+  /* 轨道的背景颜色 */
   border-radius: 10px;
 }
 
 /* 可选：自定义滚动条角落（在水平和垂直滚动条相交时出现） */
 ::-webkit-scrollbar-corner {
-  background-color: #999; /* 角落的背景颜色 */
+  background-color: #999;
+  /* 角落的背景颜色 */
+}
+
+::-webkit-scrollbar {
+  display: none;
 }

@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation"
 import { userCategoriesAtom, matchesCategory } from "@/lib/user-categories"
 import { analyzeMailWithOpenAI, type AIMailAnalysisResult } from "@/lib/ai-mail-analysis"
 
+// MARK: 配置
 type Config = {
   selected: Mail["id"] | null
   mails: Mail[]
@@ -16,6 +17,7 @@ type Config = {
   currentFolder: string
 }
 
+// MARK: 配置原子
 const configAtom = atom<Config>({
   selected: null,
   mails: defaultMails,
@@ -24,6 +26,7 @@ const configAtom = atom<Config>({
   currentFolder: 'inbox'
 })
 
+// MARK: useMail
 export function useMail() {
   const [config, setConfig] = useAtom(configAtom)
   const [loading, setLoading] = useState(true)
@@ -44,7 +47,7 @@ export function useMail() {
     }))
   }, [setConfig])
 
-  // 更新邮件已读状态的函数
+  // MARK: 更新邮件已读状态
   const markAsRead = useCallback((mailId: string) => {
     setConfig(prev => ({
       ...prev,
@@ -65,7 +68,7 @@ export function useMail() {
     }
   }, [setConfig, config.gmailAuthorized])
 
-  // 根据不同文件夹过滤邮件
+  // MARK: 根据文件夹过滤
   const getFilteredMails = useCallback((folder: string) => {
     // 首先按文件夹过滤邮件
     let filteredMails = [];
@@ -122,7 +125,7 @@ export function useMail() {
     return filteredMails;
   }, [config.mails, categoryParam, userCategories])
 
-  // 手动分析指定邮件
+  // MARK: 手动分析指定邮件
   const analyzeEmail = useCallback(async (mailId: string) => {
     const mail = config.mails.find(m => m.id === mailId);
     if (!mail) return null;
@@ -146,12 +149,13 @@ export function useMail() {
     }
   }, [config.mails, setConfig]);
 
-  // 获取邮件的分析结果（如果有）
+  // MARK: 获取邮件的分析结果
   const getMailAnalysis = useCallback((mailId: string) => {
     return config.analysisResults[mailId] || null;
   }, [config.analysisResults]);
 
-  // 获取特定类别的邮件数量，用于显示标记
+  // MARK: 获取邮件数量
+  // NOTE: 获取特定类别的邮件数量，用于显示标记
   const getCategoryCounts = useCallback(() => {
     const counts: Record<string, number> = {};
     
@@ -172,7 +176,7 @@ export function useMail() {
     return counts;
   }, [config.mails, userCategories]);
 
-  // 清空垃圾箱
+  // MARK: 清空垃圾箱
   const emptyTrash = useCallback(() => {
     setConfig(prev => ({
       ...prev,
@@ -210,7 +214,7 @@ export function useMail() {
     }
   }, [setConfig]);
 
-  // 获取 Gmail 邮件
+  // MARK: 获取 Gmail 邮件
   const fetchGmailMessages = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -334,6 +338,7 @@ export function useMail() {
     }
   }, [setConfig, config.mails.length]);
 
+  // MARK: 初始化数据
   useEffect(() => {
     // 检查 cookie 是否表明刚刚完成了 Gmail 授权
     const checkGmailAuthCookie = () => {
@@ -395,17 +400,17 @@ export function useMail() {
     initializeData();
   }, [setConfig, fetchGmailMessages, checkGmailAuth, gmailSuccess]);
 
-  // 获取选中的邮件
+  // MARK: 获取选中的邮件
   const selectedMail = config.selected 
     ? config.mails.find(mail => mail.id === config.selected) 
     : null;
 
-  // Add this function to the useMail hook
+  // MARK: 获取邮件
   const getMailById = useCallback(async (id: string) => {
     // Check if we already have this email in the state
     const existingMail = config.mails.find(mail => mail.id === id);
     if (existingMail) {
-      // If we have it, mark it as read
+      // MARK: 如果邮件已存在，标记为已读
       markAsRead(id);
       return existingMail;
     }

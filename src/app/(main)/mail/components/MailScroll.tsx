@@ -120,7 +120,7 @@ const MailScroll: React.FC<MailListProps> = ({
   // 为每个选项卡创建过滤后的邮件列表
   const allMails = folderMails;
   const unreadMails = folderMails.filter(mail => !mail.read);
-  const importantMails = folderMails.filter(mail => mail.labels.includes('important'));
+  const importantMails = folderMails.filter(mail => mail.labels.includes('important') || mail.labels.includes('重要'));
 
   // 计算滚动区域的高度
   const scrollHeight = direction === "vertical" 

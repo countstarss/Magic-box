@@ -33,6 +33,8 @@ import {
 } from "@/components/ui/dialog";
 import CategoryManager from "./CategoryManager";
 import { ResizablePanel } from "@/components/ui/resizable";
+import Link from "next/link";
+import { DashboardIcon } from "@radix-ui/react-icons";
 
 interface NavLinkItem {
   title: string;
@@ -213,7 +215,7 @@ const Nav: React.FC<NavProps> = ({
       }}
       className={cn(
         "flex flex-col bg-background border-r",
-        isCollapsed ? "items-center min-w-[90px]" : "min-w-[240px]"
+        isCollapsed ? "items-center min-w-[80px]" : "min-w-[240px]"
       )}
     >
       <div className="flex items-center p-2">
@@ -322,11 +324,18 @@ const Nav: React.FC<NavProps> = ({
       <div
         className={cn(
           "absolute bottom-4 items-center justify-center",
-          isCollapsed ? "px-5 h-[100px]" : "px-8 h-50"
+          isCollapsed ? "px-5 h-[150px]" : "px-8 h-50"
         )}
       >
         {isCollapsed ? (
           <div className="flex flex-col gap-4">
+            <div className="w-10 h-10 flex items-center justify-center">
+              <Link href="/dashboard">
+                <Button variant="outline" size="icon">
+                  <DashboardIcon />
+                </Button>
+              </Link>
+            </div>
             <div className="w-10 h-10 flex items-center justify-center">
               <ModeToggle iconSize="1rem" />
             </div>
