@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 import { analyzeMailWithOpenAI, type AIMailAnalysisResult } from '@/lib/ai-mail-analysis';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
     // 验证用户会话
-    const session = await auth();
-    if (!session || !session.user) {
+    const session = await supabase.auth.getSession();
+    if (!session?.data?.session) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }

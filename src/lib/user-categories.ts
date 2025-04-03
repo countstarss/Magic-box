@@ -1,6 +1,7 @@
 import { atom } from "jotai"
 
-// 定义分类规则接口
+// MARK:分类规则
+// NOTE:定义分类规则接口
 export interface CategoryRule {
   id: string
   name: string
@@ -13,9 +14,13 @@ export interface CategoryRule {
   }[]
 }
 
-// 默认的用户分类
+// MARK:默认分类
+// NOTE:默认用户分类
 const defaultCategories: CategoryRule[] = [
   {
+
+
+    // MARK:社交
     id: "social",
     name: "Social",
     icon: "Users2",
@@ -49,6 +54,7 @@ const defaultCategories: CategoryRule[] = [
     ]
   },
   {
+    // MARK:更新
     id: "updates",
     name: "Updates",
     icon: "AlertCircle",
@@ -72,6 +78,7 @@ const defaultCategories: CategoryRule[] = [
     ]
   },
   {
+    // MARK:论坛
     id: "forums",
     name: "Forums",
     icon: "MessagesSquare",
@@ -95,6 +102,7 @@ const defaultCategories: CategoryRule[] = [
     ]
   },
   {
+    // MARK:购物
     id: "shopping",
     name: "Shopping",
     icon: "ShoppingCart",
@@ -128,6 +136,7 @@ const defaultCategories: CategoryRule[] = [
     ]
   },
   {
+    // MARK:促销
     id: "promotions",
     name: "Promotions",
     icon: "Archive",
@@ -179,7 +188,8 @@ export function removeCategory(categoryId: string) {
 
 
 // NOTE: CategoryManager的过滤算法
-// 检查邮件是否匹配分类条件
+// MARK: 过滤算法
+// NOTE:检查邮件是否匹配分类条件
 export function matchesCategory(mail: any, category: CategoryRule): boolean {
   return category.conditions.some(condition => {
     const { type, value, operation } = condition
@@ -204,7 +214,7 @@ export function matchesCategory(mail: any, category: CategoryRule): boolean {
         return false
     }
     
-    // 字符串操作比较
+    // MARK:规则匹配
     switch(operation) {
       case 'contains':
         return fieldValue.toLowerCase().includes(value.toLowerCase())

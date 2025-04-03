@@ -12,10 +12,10 @@ export interface AIMailAnalysisResult {
   keywords: string[];
 }
 
-// AI分析层级结构
+// MARK:AI分析层级结构
 export type AnalysisLevel = 'basic' | 'standard' | 'advanced';
 
-// AI分析选项
+// MARK:AI分析选项
 export interface AIAnalysisOptions {
   level: AnalysisLevel;
   includeSummary: boolean;
@@ -32,7 +32,7 @@ const defaultOptions: AIAnalysisOptions = {
   useLocalFallback: true
 };
 
-// 开放式AI API分析邮件
+// MARK:API分析邮件
 export async function analyzeMailWithOpenAI(
   mail: Mail, 
   options: Partial<AIAnalysisOptions> = {}
@@ -123,7 +123,7 @@ function basicAnalysis(mail: Mail, result: AIMailAnalysisResult): void {
     result.spam = Math.random() > 0.7; // 简单概率模拟
   }
   
-  // 基础情感分析
+  // MARK:基础情感分析
   const positiveWords = ['thank', 'good', 'great', 'excellent', 'appreciate', 'happy'];
   const negativeWords = ['sorry', 'issue', 'problem', 'complaint', 'concern', 'wrong', 'bad'];
   
@@ -144,7 +144,7 @@ function basicAnalysis(mail: Mail, result: AIMailAnalysisResult): void {
     result.sentiment = 'negative';
   }
   
-  // 基础分类
+  // MARK:基础分类
   if (fullText.includes('invoice') || fullText.includes('payment') || fullText.includes('receipt')) {
     result.category = 'finance';
     result.autoLabels.push('finance');
@@ -153,7 +153,7 @@ function basicAnalysis(mail: Mail, result: AIMailAnalysisResult): void {
     result.autoLabels.push('meeting');
   }
   
-  // 提取简单关键词
+  // MARK:提取简单关键词
   const words = fullText.split(/\s+/);
   const wordFreq: Record<string, number> = {};
   
@@ -164,19 +164,19 @@ function basicAnalysis(mail: Mail, result: AIMailAnalysisResult): void {
     }
   });
   
-  // 按频率排序并取前5个作为关键词
+  // MARK:按频率排序并取前5个作为关键词
   result.keywords = Object.entries(wordFreq)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([word]) => word);
 }
 
-// 标准分析
+// MARK:标准分析
 function standardAnalysis(mail: Mail, result: AIMailAnalysisResult): void {
   const { subject, text, name } = mail;
   const fullText = `${subject} ${text}`.toLowerCase();
   
-  // 优先级判断
+  // MARK:优先级判断
   if (
     fullText.includes('urgent') ||
     fullText.includes('asap') ||
@@ -188,7 +188,7 @@ function standardAnalysis(mail: Mail, result: AIMailAnalysisResult): void {
     result.autoLabels.push('urgent');
   }
   
-  // 更多的分类标签
+  // MARK:更多的分类标签
   if (fullText.includes('newsletter') || fullText.includes('update')) {
     result.autoLabels.push('newsletter');
   }
@@ -197,7 +197,7 @@ function standardAnalysis(mail: Mail, result: AIMailAnalysisResult): void {
     result.autoLabels.push('work');
   }
   
-  // 更详细的分类
+  // MARK:更详细的分类
   if (fullText.includes('order') || fullText.includes('shipping') || fullText.includes('delivery')) {
     result.category = 'shopping';
     result.autoLabels.push('order');
@@ -207,7 +207,7 @@ function standardAnalysis(mail: Mail, result: AIMailAnalysisResult): void {
   }
 }
 
-// 高级分析
+// MARK:高级分析
 function advancedAnalysis(mail: Mail, result: AIMailAnalysisResult): void {
   const { subject, text } = mail;
   const fullText = `${subject} ${text}`.toLowerCase();
@@ -239,7 +239,7 @@ function advancedAnalysis(mail: Mail, result: AIMailAnalysisResult): void {
   // ... 可以添加更多高级分析逻辑
 }
 
-// 生成摘要
+// MARK:生成摘要
 function generateSummary(mail: Mail): string {
   // 实际实现中，这里应该有更复杂的摘要生成算法
   // 现在我们简单地返回前100个字符作为摘要
@@ -247,7 +247,7 @@ function generateSummary(mail: Mail): string {
   return text.length > 100 ? `${text.substring(0, 100)}...` : text;
 }
 
-// 提取行动项
+// MARK:提取行动项
 function extractActionItems(mail: Mail): string[] {
   const actionItems: string[] = [];
   const lines = mail.text.split('\n');

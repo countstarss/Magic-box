@@ -180,4 +180,19 @@ export const mobileMenu: { title: string; href: string; description: string }[] 
     href: '/contact',
     description: 'Contact',
   },
+  {
+    title: '邮箱',
+    href: '/mail',
+    description: '邮箱应用',
+  },
+  {
+    title: 'Gmail',
+    href: '/gmail',
+    description: 'Gmail邮箱集成',
+  },
+  {
+    title: '登录',
+    href: '/auth',
+    description: '用户登录',
+  },
 ];

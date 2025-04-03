@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, TaskPriority } from '@prisma/client';
-import { auth } from '@/lib/auth';
+import { PrismaClient } from '@prisma/client';
+import { supabase } from '@/lib/supabase';
 
 const prisma = new PrismaClient();
 
 // POST /api/ai/analyze-email - Analyze an email and generate tasks
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
+    const session = await supabase.auth.getSession();
     
-    if (!session?.user?.email) {
+    if (!session?.data?.session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.data.session.user.email },
     });
 
     if (!user) {
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       actionItems: [
         {
           title: `Respond to: ${email.subject}`,
-          priority: TaskPriority.HIGH,
+          priority: 'HIGH',
           dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Due in 24 hours
         },
       ],

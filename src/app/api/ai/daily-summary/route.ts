@@ -1,20 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { auth } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 
 const prisma = new PrismaClient();
 
 // GET /api/ai/daily-summary - Get a daily summary of emails
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth();
     
-    if (!session?.user?.email) {
+    const session = await supabase.auth.getSession();
+
+    
+    if (!session?.data?.session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.data.session.user.email },
     });
 
     if (!user) {
@@ -52,7 +54,7 @@ export async function GET(req: NextRequest) {
     
     // Group by sender
     const senderGroups: Record<string, any[]> = {};
-    emails.forEach(email => {
+    emails.forEach((email: any) => {
       if (!senderGroups[email.sender]) {
         senderGroups[email.sender] = [];
       }
@@ -67,9 +69,9 @@ export async function GET(req: NextRequest) {
       },
       totalEmails: emails.length,
       categories: {
-        important: emails.filter(e => e.labels.includes('important')).length,
-        unread: emails.filter(e => e.status === 'UNREAD').length,
-        sentByMe: emails.filter(e => e.folder === 'SENT').length,
+        important: emails.filter((e: any) => e.labels.includes('important')).length,
+        unread: emails.filter((e: any) => e.status === 'UNREAD').length,
+        sentByMe: emails.filter((e: any) => e.folder === 'SENT').length,
       },
       topSenders: Object.entries(senderGroups)
         .map(([sender, emails]) => ({
@@ -80,9 +82,9 @@ export async function GET(req: NextRequest) {
         .sort((a, b) => b.count - a.count)
         .slice(0, 5),
       actionItems: emails
-        .filter(e => e.status === 'UNREAD' && e.folder === 'INBOX')
+        .filter((e: any) => e.status === 'UNREAD' && e.folder === 'INBOX')
         .slice(0, 5)
-        .map(e => ({
+        .map((e: any) => ({
           id: e.id,
           subject: e.subject,
           sender: e.sender,

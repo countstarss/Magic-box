@@ -13,7 +13,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
 import {
@@ -52,7 +51,7 @@ const CategoryManager: React.FC = () => {
   const [currentCategory, setCurrentCategory] = useState<CategoryRule | null>(null)
   const [isEditing, setIsEditing] = useState(false)
 
-  // 用于表单内容的状态
+  // MARK:用于表单内容的状态
   const [formState, setFormState] = useState<Partial<CategoryRule>>({
     name: '',
     icon: 'Tag',
@@ -60,6 +59,7 @@ const CategoryManager: React.FC = () => {
     conditions: [{ type: 'subject', value: '', operation: 'contains' }]
   })
 
+  // MARK:重置表单
   const resetForm = () => {
     setFormState({
       name: '',
@@ -71,6 +71,7 @@ const CategoryManager: React.FC = () => {
     setIsEditing(false)
   }
 
+  // MARK:打开对话框
   const handleOpenDialog = (category?: CategoryRule) => {
     if (category) {
       setFormState({ ...category })
@@ -83,11 +84,13 @@ const CategoryManager: React.FC = () => {
     setIsDialogOpen(true)
   }
 
+  // MARK:关闭对话框
   const handleCloseDialog = () => {
     resetForm()
     setIsDialogOpen(false)
   }
 
+  // MARK:添加条件
   const handleAddCondition = () => {
     setFormState(prev => ({
       ...prev,
@@ -95,6 +98,7 @@ const CategoryManager: React.FC = () => {
     }))
   }
 
+  // MARK:删除条件
   const handleRemoveCondition = (index: number) => {
     setFormState(prev => ({
       ...prev,
@@ -102,6 +106,7 @@ const CategoryManager: React.FC = () => {
     }))
   }
 
+  // MARK:条件变化
   const handleConditionChange = (index: number, field: string, value: string) => {
     setFormState(prev => {
       const newConditions = [...(prev.conditions || [])]
@@ -110,6 +115,7 @@ const CategoryManager: React.FC = () => {
     })
   }
 
+  // MARK:保存分类
   const handleSaveCategory = () => {
     if (!formState.name || !formState.icon || !(formState.conditions && formState.conditions.length > 0)) {
       // 表单验证失败
@@ -117,6 +123,7 @@ const CategoryManager: React.FC = () => {
       return
     }
 
+    // MARK:保存分类
     const categoryToSave: CategoryRule = {
       id: isEditing && currentCategory ? currentCategory.id : uuidv4(),
       name: formState.name || '',
@@ -134,6 +141,7 @@ const CategoryManager: React.FC = () => {
     handleCloseDialog()
   }
 
+  // MARK:删除分类
   const handleDeleteCategory = (categoryId: string) => {
     if (confirm('Are you sure you want to delete this category?')) {
       setUserCategories(removeCategory(categoryId))

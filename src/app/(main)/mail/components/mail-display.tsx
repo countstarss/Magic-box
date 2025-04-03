@@ -13,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 import {
   DropdownMenuContent,
@@ -53,6 +54,7 @@ interface MailDisplayProps {
 export function MailDisplay({ mail }: MailDisplayProps) {
   const today = new Date()
   const { setConfig } = useMail()
+  const router = useRouter()
 
   // 归档邮件
   const handleArchive = () => {
@@ -152,10 +154,36 @@ export function MailDisplay({ mail }: MailDisplayProps) {
   // 处理回复邮件
   const handleReply = () => {
     if (!mail) return
-    toast.info(`Replying`, {
-      description: `Composing reply to "${mail.subject}"`,
-      position: "bottom-right",
-    })
+    const query = new URLSearchParams({
+      to: mail.email,
+      subject: `Re: ${mail.subject}`,
+      content: `\n\n--- Original message from ${mail.name} (${mail.email}) ---\n${mail.text}`
+    }).toString()
+    
+    router.push(`/mail/compose?${query}`)
+  }
+
+  // Handle Reply All
+  const handleReplyAll = () => {
+    if (!mail) return
+    const query = new URLSearchParams({
+      to: mail.email,
+      subject: `Re: ${mail.subject}`,
+      content: `\n\n--- Original message from ${mail.name} (${mail.email}) ---\n${mail.text}`
+    }).toString()
+    
+    router.push(`/mail/compose?${query}`)
+  }
+
+  // Handle Forward
+  const handleForward = () => {
+    if (!mail) return
+    const query = new URLSearchParams({
+      subject: `Fwd: ${mail.subject}`,
+      content: `\n\n--- Forwarded message from ${mail.name} (${mail.email}) ---\n${mail.text}`
+    }).toString()
+    
+    router.push(`/mail/compose?${query}`)
   }
 
   return (
@@ -314,13 +342,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
                 variant="ghost" 
                 size="icon" 
                 disabled={!mail}
-                onClick={() => {
-                  if (!mail) return
-                  toast.info(`Reply all`, {
-                    description: `Composing reply to all recipients of "${mail.subject}"`,
-                    position: "bottom-right",
-                  })
-                }}
+                onClick={handleReplyAll}
               >
                 <ReplyAll className="h-4 w-4" />
                 <span className="sr-only">Reply all</span>
@@ -334,13 +356,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
                 variant="ghost" 
                 size="icon" 
                 disabled={!mail}
-                onClick={() => {
-                  if (!mail) return
-                  toast.info(`Forward`, {
-                    description: `Forwarding "${mail.subject}"`,
-                    position: "bottom-right",
-                  })
-                }}
+                onClick={handleForward}
               >
                 <Forward className="h-4 w-4" />
                 <span className="sr-only">Forward</span>

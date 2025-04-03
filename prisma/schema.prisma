@@ -1,6 +1,3 @@
-// This is your Prisma schema file for WizMail
-
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,194 +7,195 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
-        
 
-// User model with extended authentication and profile details
 model User {
-  id                 String       @id @default(cuid())
-  email              String       @unique
-  name               String?
-  emailAccounts      EmailAccount[]
-  tasks              Task[]
-  emailTemplates     EmailTemplate[]
-  emailCampaigns     EmailCampaign[]
-  teamMemberships    TeamMember[]
-  emailAliases       EmailAlias[]
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id              String          @id @default(cuid())
+  email           String          @unique
+  name            String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  emailAccounts   EmailAccount[]
+  emailAliases    EmailAlias[]
+  emailCampaigns  EmailCampaign[]
+  emailTemplates  EmailTemplate[]
+  tasks           Task[]
+  teamMemberships TeamMember[]
 }
 
-// Email Account model to support multiple email integrations
 model EmailAccount {
-  id                 String       @id @default(cuid())
-  provider           String       // e.g., "gmail", "outlook"
-  providerAccountId  String
-  accessToken        String
-  refreshToken       String?
-  expiresAt          DateTime?
-  user               User         @relation(fields: [userId], references: [id])
-  userId             String
-  emails             Email[]
-  isDefault          Boolean      @default(false)
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id                String    @id @default(cuid())
+  provider          String
+  providerAccountId String
+  accessToken       String
+  refreshToken      String?
+  expiresAt         DateTime?
+  userId            String
+  isDefault         Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  emails            Email[]
+  user              User      @relation(fields: [userId], references: [id])
 }
 
-// Email model with comprehensive tracking
 model Email {
-  id                 String       @id @default(cuid())
-  subject            String
-  body               String
-  htmlBody           String?
-  sender             String
-  recipients         String[]
-  ccRecipients       String[]
-  bccRecipients      String[]
-  threadId           String?
-  parentEmailId      String?
-  parentEmail        Email?       @relation("EmailThread", fields: [parentEmailId], references: [id])
-  childEmails        Email[]      @relation("EmailThread")
-  account            EmailAccount @relation(fields: [accountId], references: [id])
-  accountId          String
-  folder             EmailFolder  @default(INBOX)
-  status             EmailStatus  @default(UNREAD)
-  labels             String[]
-  attachments        Attachment[]
-  tasks              Task[]
-  analyticsData      EmailAnalytics?
-  sharedMailboxes    SharedMailbox[]
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id              String          @id @default(cuid())
+  subject         String
+  body            String
+  htmlBody        String?
+  sender          String
+  recipients      String[]
+  ccRecipients    String[]
+  bccRecipients   String[]
+  threadId        String?
+  parentEmailId   String?
+  accountId       String
+  folder          EmailFolder     @default(INBOX)
+  status          EmailStatus     @default(UNREAD)
+  labels          String[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  attachments     Attachment[]
+  account         EmailAccount    @relation(fields: [accountId], references: [id])
+  parentEmail     Email?          @relation("EmailThread", fields: [parentEmailId], references: [id])
+  childEmails     Email[]         @relation("EmailThread")
+  analyticsData   EmailAnalytics?
+  tasks           Task[]
+  sharedMailboxes SharedMailbox[] @relation("EmailToSharedMailbox")
 }
 
-// Attachment model for email attachments
 model Attachment {
-  id                 String       @id @default(cuid())
-  filename           String
-  mimeType           String
-  size               Int
-  url                String
-  email              Email        @relation(fields: [emailId], references: [id])
-  emailId            String
-  createdAt          DateTime     @default(now())
+  id        String   @id @default(cuid())
+  filename  String
+  mimeType  String
+  size      Int
+  url       String
+  emailId   String
+  createdAt DateTime @default(now())
+  email     Email    @relation(fields: [emailId], references: [id])
 }
 
-// Task model derived from emails or manually created
 model Task {
-  id                 String       @id @default(cuid())
-  title              String
-  description        String?
-  status             TaskStatus   @default(PENDING)
-  priority           TaskPriority @default(MEDIUM)
-  dueDate            DateTime?
-  user               User         @relation(fields: [userId], references: [id])
-  userId             String
-  relatedEmail       Email?       @relation(fields: [emailId], references: [id])
-  emailId            String?
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id           String       @id @default(cuid())
+  title        String
+  description  String?
+  status       TaskStatus   @default(PENDING)
+  priority     TaskPriority @default(MEDIUM)
+  dueDate      DateTime?
+  userId       String
+  emailId      String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  relatedEmail Email?       @relation(fields: [emailId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
 }
 
-// Email Template for quick and consistent email creation
 model EmailTemplate {
-  id                 String           @id @default(cuid())
-  name               String
-  subject            String
-  body               String
-  user               User             @relation(fields: [userId], references: [id])
-  userId             String
-  category           TemplateCategory
-  isPublic           Boolean          @default(false)
-  campaigns          EmailCampaign[]
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
+  id        String           @id @default(cuid())
+  name      String
+  subject   String
+  body      String
+  userId    String
+  category  TemplateCategory
+  isPublic  Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  campaigns EmailCampaign[]
+  user      User             @relation(fields: [userId], references: [id])
 }
 
-// Email Campaign for marketing and bulk communications
 model EmailCampaign {
-  id                 String       @id @default(cuid())
-  name               String
-  description        String?
-  template           EmailTemplate @relation(fields: [templateId], references: [id])
-  templateId         String
-  recipients         String[]
-  scheduledTime      DateTime?
-  status             CampaignStatus @default(DRAFT)
-  user               User         @relation(fields: [userId], references: [id])
-  userId             String
-  analyticsData      CampaignAnalytics?
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id            String             @id @default(cuid())
+  name          String
+  description   String?
+  templateId    String
+  recipients    String[]
+  scheduledTime DateTime?
+  status        CampaignStatus     @default(DRAFT)
+  userId        String
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  analyticsData CampaignAnalytics?
+  template      EmailTemplate      @relation(fields: [templateId], references: [id])
+  user          User               @relation(fields: [userId], references: [id])
 }
 
-// Team and Collaboration Models
 model Team {
-  id                 String       @id @default(cuid())
-  name               String
-  description        String?
-  members            TeamMember[]
-  sharedMailboxes    SharedMailbox[]
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id              String          @id @default(cuid())
+  name            String
+  description     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  sharedMailboxes SharedMailbox[]
+  members         TeamMember[]
 }
 
 model TeamMember {
-  id                 String       @id @default(cuid())
-  user               User         @relation(fields: [userId], references: [id])
-  userId             String
-  team               Team         @relation(fields: [teamId], references: [id])
-  teamId             String
-  role               TeamMemberRole
-  status             TeamMemberStatus @default(ACTIVE)
-  createdAt          DateTime     @default(now())
+  id        String           @id @default(cuid())
+  userId    String
+  teamId    String
+  role      TeamMemberRole
+  status    TeamMemberStatus @default(ACTIVE)
+  createdAt DateTime         @default(now())
+  team      Team             @relation(fields: [teamId], references: [id])
+  user      User             @relation(fields: [userId], references: [id])
 }
 
 model SharedMailbox {
-  id                 String       @id @default(cuid())
-  email              String       @unique
-  name               String
-  team               Team         @relation(fields: [teamId], references: [id])
-  teamId             String
-  emails             Email[]
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  teamId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  team      Team     @relation(fields: [teamId], references: [id])
+  emails    Email[]  @relation("EmailToSharedMailbox")
 }
 
-// Email Alias for multiple email addresses
 model EmailAlias {
-  id                 String       @id @default(cuid())
-  alias              String       @unique
-  description        String?
-  user               User         @relation(fields: [userId], references: [id])
-  userId             String
-  isActive           Boolean      @default(true)
-  createdAt          DateTime     @default(now())
+  id          String   @id @default(cuid())
+  alias       String   @unique
+  description String?
+  userId      String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
 }
 
-// Analytics Models
 model EmailAnalytics {
-  id                 String       @id @default(cuid())
-  email              Email        @relation(fields: [emailId], references: [id])
-  emailId            String       @unique
-  openCount          Int          @default(0)
-  clickCount         Int          @default(0)
-  firstOpenedAt      DateTime?
-  lastOpenedAt       DateTime?
-  deviceInfo         Json?
-  locationInfo       Json?
+  id            String    @id @default(cuid())
+  emailId       String    @unique
+  openCount     Int       @default(0)
+  clickCount    Int       @default(0)
+  firstOpenedAt DateTime?
+  lastOpenedAt  DateTime?
+  deviceInfo    Json?
+  locationInfo  Json?
+  email         Email     @relation(fields: [emailId], references: [id])
 }
 
 model CampaignAnalytics {
-  id                 String       @id @default(cuid())
-  campaign           EmailCampaign @relation(fields: [campaignId], references: [id])
-  campaignId         String       @unique
-  sentCount          Int          @default(0)
-  openCount          Int          @default(0)
-  clickCount         Int          @default(0)
-  unsubscribeCount   Int          @default(0)
+  id               String        @id @default(cuid())
+  campaignId       String        @unique
+  sentCount        Int           @default(0)
+  openCount        Int           @default(0)
+  clickCount       Int           @default(0)
+  unsubscribeCount Int           @default(0)
+  campaign         EmailCampaign @relation(fields: [campaignId], references: [id])
 }
 
-// Enums for various statuses and categories
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Template {
+  id        String   @id
+  name      String
+  subject   String
+  content   String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+
+  @@index([userId])
+}
+
 enum EmailFolder {
   INBOX
   SENT

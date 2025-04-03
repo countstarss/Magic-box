@@ -1,54 +1,85 @@
-import { google } from 'googleapis';
-import { auth } from '@/lib/auth';
-import { NextResponse } from 'next/server';
-import { Buffer } from 'node:buffer';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(req: Request) {
-  const session = await auth();
+// Resend API KEY
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
+// 生成HTML邮件模板的函数
+function generateEmailHtml(content: string, senderName: string = 'WizMail') {
+  // 将换行符转换为<br>标签
+  const formattedContent = content.replace(/\n/g, '<br>');
+  
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="padding: 20px; background-color: #f9f9f9; border-radius: 5px;">
+        <div style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+          <h1 style="color: #333; font-size: 24px; margin: 0 0 10px;">WizMail</h1>
+        </div>
+        
+        <div style="color: #333; font-size: 16px; line-height: 1.5;">
+          ${formattedContent}
+        </div>
+        
+        <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px; color: #777; font-size: 14px;">
+          <p>发自 ${senderName}</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
-  const accessToken = (session.user as any).accessToken;
-
-  if (!accessToken) {
-    return NextResponse.json({ error: 'No access token' }, { status: 401 });
-  }
-
-  const gmail = google.gmail({ version: 'v1', auth: accessToken });
-
+export async function POST(req: NextRequest) {
   try {
-    const { to, subject, body } = await req.json();
+    // 从请求体中获取邮件信息
+    const { to, cc, bcc, subject, content } = await req.json();
 
-    const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
-    const messageParts = [
-      `From: me`,
-      `To: ${to}`,
-      'Content-Type: text/html; charset=utf-8',
-      'MIME-Version: 1.0',
-      `Subject: ${utf8Subject}`,
-      '',
-      body,
-    ];
-    const message = messageParts.join('\n');
+    // 验证必填字段
+    if (!to || !subject || !content) {
+      return NextResponse.json(
+        { error: '收件人、主题和内容为必填项' },
+        { status: 400 }
+      );
+    }
 
-    const encodedMessage = Buffer.from(message)
-      .toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
+    // 处理收件人格式
+    const toList = Array.isArray(to) ? to : [to];
+    const ccList = cc ? (Array.isArray(cc) ? cc : [cc]) : [];
+    const bccList = bcc ? (Array.isArray(bcc) ? bcc : [bcc]) : [];
 
-    const response = await gmail.users.messages.send({
-      userId: 'me',
-      requestBody: {
-        raw: encodedMessage,
+    // 生成HTML内容
+    const htmlContent = generateEmailHtml(content);
+
+    // 准备要发送到Resend API的数据
+    const emailData = {
+      from: 'WizMail <onboarding@resend.dev>',
+      to: toList,
+      cc: ccList.length > 0 ? ccList : undefined,
+      bcc: bccList.length > 0 ? bccList : undefined,
+      subject: subject,
+      html: htmlContent
+    };
+
+    // 直接调用Resend API
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
       },
+      body: JSON.stringify(emailData)
     });
 
-    return NextResponse.json({ message: 'Email sent successfully', id: response.data.id }, { status: 200 });
-  } catch (error: any) {
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to send email');
+    }
+
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
     console.error('Error sending email:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : '发送邮件时出错' },
+      { status: 500 }
+    );
   }
 } 
