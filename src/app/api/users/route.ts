@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { auth } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 
 const prisma = new PrismaClient();
 
 // GET /api/users
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const session = await supabase.auth.getSession();
+    if (!session?.data?.session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -34,8 +34,8 @@ export async function GET(req: NextRequest) {
 // POST /api/users
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const session = await supabase.auth.getSession();
+    if (!session?.data?.session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

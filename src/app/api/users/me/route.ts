@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { auth } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 
 const prisma = new PrismaClient();
 
 // GET /api/users/me - Get current user
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth();
+    const session = await supabase.auth.getSession();
     
-    if (!session?.user?.email) {
+    if (!session?.data?.session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get user from database or create if doesn't exist
     let user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.data.session.user.email },
       include: {
         emailAccounts: {
           select: {
@@ -32,8 +32,8 @@ export async function GET(req: NextRequest) {
     if (!user) {
       user = await prisma.user.create({
         data: {
-          email: session.user.email,
-          name: session.user.name || null,
+          email: session.data.session.user.email,
+          name: session.data.session.user.user_metadata.name || null,
         },
         include: {
           emailAccounts: true,
@@ -62,9 +62,9 @@ export async function GET(req: NextRequest) {
 // PATCH /api/users/me - Update current user
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await auth();
+    const session = await supabase.auth.getSession();
     
-    if (!session?.user?.email) {
+    if (!session?.data?.session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -72,7 +72,7 @@ export async function PATCH(req: NextRequest) {
     const { name } = data;
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.data.session.user.email },
     });
 
     if (!user) {
@@ -80,7 +80,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const updatedUser = await prisma.user.update({
-      where: { email: session.user.email },
+      where: { email: session.data.session.user.email },
       data: { name },
     });
 

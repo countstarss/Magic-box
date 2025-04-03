@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { auth } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 
 const prisma = new PrismaClient();
 
 // GET /api/tasks - Get tasks for the current user
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth();
+    const session = await supabase.auth.getSession();
     
-    if (!session?.user?.email) {
+    if (!session?.data?.session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.data.session.user.email },
     });
 
     if (!user) {
@@ -87,14 +87,14 @@ export async function GET(req: NextRequest) {
 // POST /api/tasks - Create a new task
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
+    const session = await supabase.auth.getSession();
     
-    if (!session?.user?.email) {
+    if (!session?.data?.session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.data.session.user.email },
     });
 
     if (!user) {
