@@ -190,7 +190,7 @@ const Nav: React.FC<NavProps> = ({
       // 确保展开状态
       setIsCollapsed(false);
     }
-  }, []);
+  }, [defaultCollapsed, onCollapsedChange]);
 
   return (
     <ResizablePanel
@@ -214,11 +214,11 @@ const Nav: React.FC<NavProps> = ({
         if (onCollapsedChange) onCollapsedChange(false);
       }}
       className={cn(
-        "flex flex-col bg-background border-r",
+        "flex flex-col bg-background border-r h-screen",
         isCollapsed ? "items-center min-w-[80px]" : "min-w-[240px]"
       )}
     >
-      <div className="flex items-center p-2">
+      <div className="flex items-center p-4">
         {isCollapsed ? (
           <div className="flex items-center gap-2">
             <h2 className="font-semibold text-sm">WizMail</h2>

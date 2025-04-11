@@ -21,9 +21,7 @@ export default function Layout({ children }: LayoutProps) {
             <SidebarItem title="Overview" href="/dashboard/you" />
             <SidebarItem title="Readed" href="/dashboard/you/readed" />
             <SidebarItem title="Liked" href="/dashboard/you/liked" />
-            <SidebarItem title="Notifications" href="/dashboard/you/notifications" />
           </InnerSidebar>
-          {/* Main Content */}
           <main className="flex-1 p-8 overflow-y-auto">
             {children}
           </main>

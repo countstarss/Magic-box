@@ -7,7 +7,7 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import { UserNav } from "./UserNav";
 import BorderMagic from "../../global/Border-Magic";
 import { twMerge } from "tailwind-merge";
-import { mobileMenu } from "@/lib/data/menu";
+import { mobileMenu } from "@/lib/data/constant";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import GmailAuthButton from "@/components/auth/GmailAuthButton";

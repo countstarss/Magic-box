@@ -1,6 +1,6 @@
 import React from 'react'
 import Profile from './_components/profile';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 
 const SettingPage = async () => {

@@ -50,12 +50,7 @@ const Dashboard = ({
           >
             <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-6 h-[calc(100vh-140px)] overflow-y-scroll">
               {
-                Array.from({ length: 12 }, (_, index) => (
-                  <ContentCourseCard
-                    courseInfo={courseInfo}
-                    key={index}
-                  />
-                ))
+                
               }
             </div>
           </TabsContent>
@@ -64,12 +59,7 @@ const Dashboard = ({
           >
             <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-6 h-[calc(100vh-140px)] overflow-y-scroll">
               {
-                Array.from({ length: 12 }, (_, index) => (
-                  <ContentCourseCard
-                    courseInfo={courseInfo}
-                    key={index}
-                  />
-                ))
+                
               }
             </div>
           </TabsContent>

@@ -1,6 +1,5 @@
 import React from 'react';
-import Avatar from './avatar';
-import ProfileForm from '../../../_components/form/profile-form';
+import Image from 'next/image';
 
 const Profile = () => {
 
@@ -23,13 +22,7 @@ const Profile = () => {
               {/* 
               TODO: 设置用户头像
               */}
-              <Avatar />
-              <ProfileForm
-                Name={'lukeking'}
-                email={'lukeking@gmail.com'}
-                profileImage={''}
-                // onUpdate={updateUserInfo}
-              />
+              <Image src={'/images/avatar.png'} alt='avatar' width={100} height={100} />
             </div>
           </div>
         </div>
@@ -45,12 +38,6 @@ const Profile = () => {
             className='flex flex-row gap-10 w-full justtify-between mt-4'
           >
             <div className='flex flex-col h-full w-full'>
-              <ProfileForm
-                Name={'lukeking'}
-                email={'lukeking@gmail.com'}
-                profileImage={''}
-                // onUpdate={updateUserInfo}
-              />
             </div>
           </div>
         </div>

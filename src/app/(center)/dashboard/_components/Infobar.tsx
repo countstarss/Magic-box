@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Book, Headphones, Menu, Search, SquareChevronLeft, SquareChevronRight } from "lucide-react";
+import { Book, Headphones, Menu, Search, SquareChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { UserNav } from "@/components/HomePage/Nav/UserNav";
@@ -9,7 +9,6 @@ import RouterIndicator from "@/components/global/RouterIndicator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { menuOptions } from "@/lib/data/constant";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import ContextMenuWrapper from "@/components/ui/ContextMenuWrapper";
 
 const InfoBar = ({

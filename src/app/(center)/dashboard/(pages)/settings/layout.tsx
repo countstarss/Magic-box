@@ -19,10 +19,8 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex h-[calc(100vh-5rem)] bg-gray-50 dark:bg-transparent">
             {/* Sidebar */}
             <InnerSidebar>
-              <SidebarItem title="Profile" href="/dashboard/settings/profile" />
               <SidebarItem title="Account" href="/dashboard/settings/account" />
               <SidebarItem title="Notifications" href="/dashboard/settings/notifications" />
-              <SidebarItem title="Security" href="/dashboard/settings/security" />
             </InnerSidebar>
 
             {/* Main Content */}

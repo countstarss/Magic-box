@@ -1,35 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, CampaignStatus } from '@prisma/client';
-import { auth } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient, CampaignStatus } from "@prisma/client";
+import { supabase } from "@/lib/supabase";
 
 const prisma = new PrismaClient();
 
 // GET /api/campaigns - Get email campaigns
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const session = await supabase.auth.getSession();
+
+    if (!session?.data?.session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.data.session.user.email },
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get query parameters
     const url = new URL(req.url);
-    const status = url.searchParams.get('status') as CampaignStatus | null;
-    
+    const status = url.searchParams.get("status") as CampaignStatus | null;
+
     // Build where clause
     const where: any = {
       userId: user.id,
     };
-    
+
     // Filter by status if specified
     if (status) {
       where.status = status;
@@ -48,15 +48,15 @@ export async function GET(req: NextRequest) {
         analyticsData: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
     return NextResponse.json(campaigns);
   } catch (error) {
-    console.error('Error fetching email campaigns:', error);
+    console.error("Error fetching email campaigns:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch email campaigns' },
+      { error: "Failed to fetch email campaigns" },
       { status: 500 }
     );
   }
@@ -65,18 +65,18 @@ export async function GET(req: NextRequest) {
 // POST /api/campaigns - Create a new email campaign
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const session = await supabase.auth.getSession();
+
+    if (!session?.data?.session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.data.session.user.email },
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const data = await req.json();
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
 
     if (!name || !templateId || !recipients || !recipients.length) {
       return NextResponse.json(
-        { error: 'Name, templateId, and recipients are required' },
+        { error: "Name, templateId, and recipients are required" },
         { status: 400 }
       );
     }
@@ -93,15 +93,15 @@ export async function POST(req: NextRequest) {
     const template = await prisma.emailTemplate.findUnique({
       where: {
         id: templateId,
-        OR: [
-          { userId: user.id },
-          { isPublic: true },
-        ],
+        OR: [{ userId: user.id }, { isPublic: true }],
       },
     });
 
     if (!template) {
-      return NextResponse.json({ error: 'Template not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Template not found" },
+        { status: 404 }
+      );
     }
 
     // If scheduledTime is provided, validate that it's in the future
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
       const now = new Date();
       if (scheduledDate <= now) {
         return NextResponse.json(
-          { error: 'Scheduled time must be in the future' },
+          { error: "Scheduled time must be in the future" },
           { status: 400 }
         );
       }
@@ -144,10 +144,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(campaign, { status: 201 });
   } catch (error) {
-    console.error('Error creating email campaign:', error);
+    console.error("Error creating email campaign:", error);
     return NextResponse.json(
-      { error: 'Failed to create email campaign' },
+      { error: "Failed to create email campaign" },
       { status: 500 }
     );
   }
-} 
+}

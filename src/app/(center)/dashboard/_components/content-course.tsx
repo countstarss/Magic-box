@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "timeago.js";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface Course {
     id: string;
@@ -55,7 +56,9 @@ export default function ContentCourseCard({ courseInfo }: ContentCourseCardProps
             <CardHeader className="relative p-0">
                 {courseInfo.videoUrl ? (
                     <div className="relative w-full h-[150px] overflow-hidden group">
-                        <img
+                        <Image
+                            width={100}
+                            height={100}
                             src={courseInfo.imageUrl}
                             alt={courseInfo.title}
                             className="w-full h-[150px] object-cover"
@@ -79,7 +82,9 @@ export default function ContentCourseCard({ courseInfo }: ContentCourseCardProps
                         )}
                     </div>
                 ) : (
-                    <img
+                    <Image
+                        width={100}
+                        height={100}
                         src={courseInfo.imageUrl}
                         alt={courseInfo.title}
                         className="w-full h-[150px] object-cover"

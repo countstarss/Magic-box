@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 // Resend API KEY
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 // 生成HTML邮件模板的函数
-function generateEmailHtml(content: string, senderName: string = 'WizMail') {
+function generateEmailHtml(content: string, senderName: string = "WizMail") {
   // 将换行符转换为<br>标签
-  const formattedContent = content.replace(/\n/g, '<br>');
-  
+  const formattedContent = content.replace(/\n/g, "<br>");
+
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="padding: 20px; background-color: #f9f9f9; border-radius: 5px;">
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     // 验证必填字段
     if (!to || !subject || !content) {
       return NextResponse.json(
-        { error: '收件人、主题和内容为必填项' },
+        { error: "收件人、主题和内容为必填项" },
         { status: 400 }
       );
     }
@@ -50,36 +50,36 @@ export async function POST(req: NextRequest) {
 
     // 准备要发送到Resend API的数据
     const emailData = {
-      from: 'WizMail <onboarding@resend.dev>',
+      from: "WizMail <onboarding@resend.dev>",
       to: toList,
       cc: ccList.length > 0 ? ccList : undefined,
       bcc: bccList.length > 0 ? bccList : undefined,
       subject: subject,
-      html: htmlContent
+      html: htmlContent,
     };
 
-    // 直接调用Resend API
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
+    // MARK: 调用Resend
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(emailData)
+      body: JSON.stringify(emailData),
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to send email');
+      throw new Error(data.message || "Failed to send email");
     }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error("Error sending email:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : '发送邮件时出错' },
+      { error: error instanceof Error ? error.message : "发送邮件时出错" },
       { status: 500 }
     );
   }
-} 
+}

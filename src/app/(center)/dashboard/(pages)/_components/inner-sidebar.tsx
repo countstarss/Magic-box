@@ -1,7 +1,6 @@
 import React from 'react';
 
 interface InnerSidebarProps {
-    // You can define any props needed here
     children: React.ReactNode;
 }
 
