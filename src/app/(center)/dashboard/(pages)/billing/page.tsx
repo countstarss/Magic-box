@@ -1,17 +1,12 @@
 import React from 'react';
-import BillData from './_components/BillData';
 import ContextMenuWrapper from '@/components/ui/ContextMenuWrapper';
-
+import BillingLayout from './_components/BillingLayout';
 
 const Billing = () => {
-
   return (
     <ContextMenuWrapper>
-      <h1 className="text-4xl sticky top-0 z-[10] p-6 bg-background/50 backdrop-blur-lg flex items-center border-b">
-        <span>Billing</span>
-      </h1>
-      <div className='p-4'>
-        <BillData />
+      <div className="p-8 pb-24">
+        <BillingLayout />
       </div>
     </ContextMenuWrapper>
   );

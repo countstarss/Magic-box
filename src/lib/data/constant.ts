@@ -1,8 +1,9 @@
 import Category from "@/components/icons/category";
-// import Chat from "@/components/icons/chat";
-// import Logs from "@/components/icons/clipboard";
-// import CRM from "@/components/icons/crm";
-// import Envelope from "@/components/icons/envelope";
+// import Notification from "@/components/icons/notification";
+import Chat from "@/components/icons/chat";
+import Logs from "@/components/icons/clipboard";
+import CRM from "@/components/icons/crm";
+import Envelope from "@/components/icons/envelope";
 import Home from "@/components/icons/home";
 import Payment from "@/components/icons/payment";
 import Settings from "@/components/icons/settings";
@@ -21,8 +22,13 @@ MARK: - menuOptions
 */
 export const menuOptions = [
   { name: "Home", Component: Home, href: "/dashboard" },
-  { name: "Content", Component: Category, href: "/dashboard/content" },
-  { name: "You", Component: User, href: "/dashboard/you" },
+  { name: "Template", Component: Category, href: "/dashboard/template" },
+  { name: "Notification", Component: User, href: "/dashboard/notification" },
+  { name: "Security", Component: User, href: "/dashboard/security" },
+  { name: "Team", Component: Chat, href: "/dashboard/team" },
+  { name: "Event", Component: Envelope, href: "/dashboard/event" },
+  { name: "CRM", Component: CRM, href: "/dashboard/crm" },
+  { name: "Data", Component: CRM, href: "/dashboard/data" },
   { name: "Billing", Component: Payment, href: "/dashboard/billing" },
   { name: "Settings", Component: Settings, href: "/dashboard/settings" },
 ];

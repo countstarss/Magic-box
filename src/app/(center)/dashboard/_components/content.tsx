@@ -2,7 +2,6 @@ import { cn } from '@/lib/utils';
 import React from 'react';
 
 interface ContentProps {
-  // You can define any props needed here
   children?: React.ReactNode;
   title: string;
   className?: string;
@@ -10,7 +9,6 @@ interface ContentProps {
 
 const Content = ({
   children,
-  title,
   className,
 }: ContentProps) => {
 

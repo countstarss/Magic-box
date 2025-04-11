@@ -1,5 +1,4 @@
 import React from 'react'
-import DashboardSharedLayout from '../layout'
 
 /*
 NOTE:: 这个Layout决定了网站的整体布局

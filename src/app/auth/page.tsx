@@ -1,12 +1,13 @@
-"use client";
+'use client';
 
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import AuthForm from "@/components/auth/AuthForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
-export default function AuthPage() {
+// 创建一个客户端组件来处理搜索参数
+function AuthContent() {
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -31,6 +32,43 @@ export default function AuthPage() {
   }, [searchParams]);
 
   return (
+    <>
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {success && (
+        <Alert
+          variant="default"
+          className="mb-6 bg-green-50 border-green-200 text-green-800"
+        >
+          <CheckCircle2 className="h-4 w-4 text-green-500" />
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
+      )}
+
+      <AuthForm />
+    </>
+  );
+}
+
+// 加载状态的占位组件
+function AuthFormFallback() {
+  return (
+    <div className="space-y-4">
+      <div className="h-10 w-full bg-gray-200 dark:bg-gray-800 animate-pulse rounded"></div>
+      <div className="h-12 w-full bg-gray-200 dark:bg-gray-800 animate-pulse rounded"></div>
+      <div className="h-12 w-full bg-gray-200 dark:bg-gray-800 animate-pulse rounded"></div>
+      <div className="h-12 w-full bg-gray-200 dark:bg-gray-800 animate-pulse rounded"></div>
+    </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Left side - Auth Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center p-8 lg:p-16">
@@ -42,24 +80,9 @@ export default function AuthPage() {
             <p className="text-gray-600 dark:text-gray-400">智能邮件管理平台</p>
           </div>
 
-          {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {success && (
-            <Alert
-              variant="default"
-              className="mb-6 bg-green-50 border-green-200 text-green-800"
-            >
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              <AlertDescription>{success}</AlertDescription>
-            </Alert>
-          )}
-
-          <AuthForm />
+          <Suspense fallback={<AuthFormFallback />}>
+            <AuthContent />
+          </Suspense>
         </div>
       </div>
 

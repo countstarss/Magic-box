@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import * as React from "react"
 import {
@@ -50,8 +50,7 @@ const MailScroll: React.FC<MailListProps> = ({
   // 获取当前文件夹的邮件
   const folderMails = React.useMemo(() => 
     getFilteredMails(currentFolder), 
-    [getFilteredMails, currentFolder, config.mails]
-  );
+    [getFilteredMails, currentFolder, config.mails]);
 
   const handleMailClick = (mailId: string) => {
     setConfig(prev => ({ ...prev, selected: mailId }));

@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { supabase } from '@/lib/supabase';
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+import { supabase } from "@/lib/supabase";
 
 const prisma = new PrismaClient();
 
@@ -8,9 +8,9 @@ const prisma = new PrismaClient();
 export async function POST(req: NextRequest) {
   try {
     const session = await supabase.auth.getSession();
-    
+
     if (!session?.data?.session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const data = await req.json();
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     if (!emailId) {
       return NextResponse.json(
-        { error: 'Email ID is required' },
+        { error: "Email ID is required" },
         { status: 400 }
       );
     }
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!email) {
-      return NextResponse.json({ error: 'Email not found' }, { status: 404 });
+      return NextResponse.json({ error: "Email not found" }, { status: 404 });
     }
 
     // In a real implementation, this would call an AI service to analyze the email
@@ -52,12 +52,12 @@ export async function POST(req: NextRequest) {
       actionItems: [
         {
           title: `Respond to: ${email.subject}`,
-          priority: 'HIGH',
+          priority: "HIGH",
           dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Due in 24 hours
         },
       ],
-      sentiment: 'neutral',
-      categories: ['work', 'needs-response'],
+      sentiment: "neutral",
+      categories: ["work", "needs-response"],
     };
 
     // Create a task based on the analysis
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
           data: {
             title: item.title,
             description: `Auto-generated from email analysis: ${analysisResult.summary}`,
-            priority: item.priority,
+            // priority: item.priority,
             dueDate: item.dueDate,
             userId: user.id,
             emailId: email.id,
@@ -81,10 +81,10 @@ export async function POST(req: NextRequest) {
       tasksCreated: tasks,
     });
   } catch (error) {
-    console.error('Error analyzing email:', error);
+    console.error("Error analyzing email:", error);
     return NextResponse.json(
-      { error: 'Failed to analyze email' },
+      { error: "Failed to analyze email" },
       { status: 500 }
     );
   }
-} 
+}

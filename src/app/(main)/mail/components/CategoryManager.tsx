@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import React, { useState } from 'react'
 import { useAtom } from 'jotai'
@@ -183,7 +183,7 @@ const CategoryManager: React.FC = () => {
                 <ul className="list-disc list-inside space-y-1">
                   {category.conditions.map((condition, index) => (
                     <li key={index} className="text-xs">
-                      {condition.type} {condition.operation} "{condition.value}"
+                      {condition.type} {condition.operation} &#34;{condition.value}&#34;
                     </li>
                   ))}
                 </ul>

@@ -11,10 +11,7 @@ import { menuOptions } from "@/lib/data/constant";
 import Link from "next/link";
 import ContextMenuWrapper from "@/components/ui/ContextMenuWrapper";
 
-const InfoBar = ({
-  isCollapsed,
-  setIsCollapsed
-}: { isCollapsed: boolean, setIsCollapsed: (isCollapsed: boolean) => void }) => {
+const InfoBar = () => {
   // const { data: session, status } = useSession(); // 获取用户会话信息
   const [open, setOpen] = useState(false);
 
@@ -31,16 +28,6 @@ const InfoBar = ({
       <div className="flex flex-row justify-between gap-6 items-center px-4 py-2 w-full dark:bg-black border-b-[1px] border-gray-300 dark:border-white/20">
         <div className="flex flex-row gap-4 items-center">
           <div className="md:flex gap-4 items-center hidden">
-            {
-              isCollapsed && (
-                <div className="w-10 h-10 flex items-center justify-center cursor-pointer hover:bg-gray-300/20 rounded-lg border-gray-300 dark:border-white/20">
-                  <SquareChevronRight
-                    className='text-xl text-gray-500'
-                    onClick={() => setIsCollapsed(false)}
-                  />
-                </div>
-              )
-            }
           </div>
           <div className="lg:flex lg:flex-row items-center hidden">
             <RouterIndicator />
