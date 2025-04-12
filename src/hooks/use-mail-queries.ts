@@ -139,8 +139,11 @@ export function useEmails(options: EmailQueryOptions = {}) {
   return useQuery({
     queryKey: ["emails", options],
     queryFn: () => fetchEmails(options),
-    staleTime: 1000 * 60 * 2, // 2分钟内不重新获取
+    staleTime: 1000 * 60 * 5, // 增加到5分钟内不重新获取
+    gcTime: 1000 * 60 * 10, // 缓存10分钟
     retry: 2, // 失败时最多重试2次
+    refetchOnMount: false, // 组件挂载时不自动重新获取
+    refetchOnWindowFocus: false, // 窗口获取焦点时不自动重新获取
   });
 }
 
@@ -148,9 +151,42 @@ export function useEmails(options: EmailQueryOptions = {}) {
  * 邮件详情React Query Hook
  */
 export function useEmailDetail(emailId: string | null) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: ["email", emailId],
-    queryFn: () => fetchEmailDetail(emailId as string),
+    queryFn: () => {
+      // 1. 首先尝试从缓存中获取详细信息
+      const cachedData = queryClient.getQueryData<EmailMessage[]>(["emails"]);
+      if (cachedData) {
+        const emailInCache = cachedData.find((email) => email.id === emailId);
+        if (emailInCache && emailInCache.body) {
+          // 如果缓存中已有完整数据（包含正文），直接返回
+          console.log(`[Query] 从缓存获取邮件详情: ${emailId}`);
+          return emailInCache;
+        }
+      }
+
+      // 2. 尝试从邮件查询缓存中查找所有匹配的查询键
+      const emailQueries = queryClient.getQueriesData<EmailMessage[]>({
+        queryKey: ["emails"],
+      });
+
+      // 遍历所有email查询结果
+      for (const [, data] of emailQueries) {
+        if (data) {
+          const emailInQueries = data.find((email) => email.id === emailId);
+          if (emailInQueries && emailInQueries.body) {
+            console.log(`[Query] 从查询缓存获取邮件详情: ${emailId}`);
+            return emailInQueries;
+          }
+        }
+      }
+
+      // 3. 如果缓存中没有找到或没有完整数据，则发起API请求
+      console.log(`[Query] 通过API获取邮件详情: ${emailId}`);
+      return fetchEmailDetail(emailId as string);
+    },
     enabled: !!emailId, // 只有当emailId存在时才执行查询
     staleTime: 1000 * 60 * 5, // 5分钟内不重新获取
     retry: 2, // 失败时最多重试2次

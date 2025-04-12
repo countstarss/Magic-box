@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { ModeToggle } from "../../../../components/ui/mode-toggle";
 import { useAtom } from "jotai";
 import { userCategoriesAtom } from "@/lib/user-categories";
+import { persistedMailStateAtom } from "@/lib/mail-state";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { IconByName } from "./IconByName";
 import { NavItem } from "./navItem";
@@ -33,7 +34,6 @@ import Link from "next/link";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import { AccountSwitcher } from "./account-switcher";
 import { EmailMessage } from "@/lib/types/nylas-types";
-import { useMail } from "@/hooks/use-mail";
 
 interface NavLinkItem {
   title: string;
@@ -68,8 +68,8 @@ const Nav: React.FC<NavProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
   const [userCategories] = useAtom(userCategoriesAtom);
-  const { getCategoryCounts, setCurrentFolder, currentFolder } = useMail();
-  const categoryCounts = getCategoryCounts();
+  const [mailState, setMailState] = useAtom(persistedMailStateAtom);
+  const categoryCounts: Record<string, number> = {}; // 使用一个空对象，因为我们暂时不实现分类计数
   const [isManageOpen, setIsManageOpen] = React.useState(false);
 
   const pathname = usePathname();
@@ -96,34 +96,42 @@ const Nav: React.FC<NavProps> = ({
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  // 设置当前文件夹
+  const setCurrentFolder = (folder: string) => {
+    setMailState({ 
+      currentFolder: folder,
+      selectedId: null // 切换文件夹时重置选择的邮件
+    });
+  };
+
   // 主要链接数据
   const mainLinks: NavLinkItem[] = [
     {
       title: "Inbox",
       label: "",
       icon: Inbox,
-      variant: currentFolder === 'inbox' ? "default" : "ghost",
+      variant: mailState.currentFolder === 'inbox' ? "default" : "ghost",
       onClick: () => setCurrentFolder('inbox'),
     },
     {
       title: "Drafts",
       label: "",
       icon: File,
-      variant: currentFolder === 'draft' ? "default" : "ghost",
+      variant: mailState.currentFolder === 'draft' ? "default" : "ghost",
       onClick: () => setCurrentFolder('draft'),
     },
     {
       title: "Sent",
       label: "",
       icon: Send,
-      variant: currentFolder === 'sent' ? "default" : "ghost",
+      variant: mailState.currentFolder === 'sent' ? "default" : "ghost",
       onClick: () => setCurrentFolder('sent'),
     },
     {
       title: "Junk",
       label: "",
       icon: ArchiveX,
-      variant: currentFolder === 'junk' ? "default" : "ghost",
+      variant: mailState.currentFolder === 'junk' ? "default" : "ghost",
       onClick: () => setCurrentFolder('junk'),
     },
   ];
@@ -134,14 +142,14 @@ const Nav: React.FC<NavProps> = ({
       title: "Trash",
       label: "",
       icon: Trash2,
-      variant: currentFolder === 'trash' ? "default" : "ghost",
+      variant: mailState.currentFolder === 'trash' ? "default" : "ghost",
       onClick: () => setCurrentFolder('trash'),
     },
     {
       title: "Archive",
       label: "",
       icon: Archive,
-      variant: currentFolder === 'archive' ? "default" : "ghost",
+      variant: mailState.currentFolder === 'archive' ? "default" : "ghost",
       onClick: () => setCurrentFolder('archive'),
     },
   ];
@@ -163,7 +171,7 @@ const Nav: React.FC<NavProps> = ({
   });
 
   // 保存初始layout用于保持一致性
-  const initialLayout = React.useRef(defaultLayout);
+  // const initialLayout = React.useRef(defaultLayout);
 
   // 监听defaultCollapsed的变化
   React.useEffect(() => {
@@ -193,7 +201,7 @@ const Nav: React.FC<NavProps> = ({
 
   return (
     <ResizablePanel
-      defaultSize={initialLayout.current[0]}
+      defaultSize={defaultLayout[0]}
       collapsedSize={navCollapsedSize}
       collapsible={true}
       minSize={14}

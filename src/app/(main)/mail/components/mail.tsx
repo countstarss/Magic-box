@@ -16,7 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { useResizableSidebar } from "@/hooks/use-resizable-sidebar"
-import { useEmails } from "@/hooks/use-mail-queries"
+import { useMail } from "@/hooks/use-mail"
 
 interface MailProps {
   accounts: {
@@ -37,24 +37,17 @@ export function Mail({
   navCollapsedSize,
   children,
 }: MailProps) {
-  // 使用邮件查询钩子获取邮件列表
-  const { 
-    data: emails = [], 
-    isLoading,
-    error
-  } = useEmails({ 
-    unread: false,
-    limit: 50  // 获取更多邮件
-  });
+  // 使用mail hook获取邮件状态和方法
+  const { config } = useMail();
   
   // 使用自定义Hook管理侧边栏和布局
   const {
     isCollapsed,
-    panelGroupRef,
-    initialLayout,
     onLayoutChange,
     onCollapse,
-    toggleSidebar
+    toggleSidebar,
+    panelGroupRef,
+    sizes
   } = useResizableSidebar({
     defaultLayout,
     defaultCollapsed,
@@ -67,23 +60,23 @@ export function Mail({
       //MARK: Panel
       */}
       <ResizablePanelGroup
-        ref={panelGroupRef}
         direction="horizontal"
         onLayout={onLayoutChange}
         className="h-full items-stretch"
         id="mail-layout"
+        ref={panelGroupRef}
       >
         <Nav
           accounts={accounts}
-          mails={emails}
-          defaultLayout={initialLayout.current}
+          mails={config.mails}
+          defaultLayout={defaultLayout}
           defaultCollapsed={isCollapsed}
           navCollapsedSize={navCollapsedSize}
           onCollapsedChange={onCollapse}
         />
         <ResizableHandle withHandle />
         <ResizablePanel 
-          defaultSize={initialLayout.current[1]}
+          defaultSize={defaultLayout[1]}
           minSize={30}
         >
           <div className="flex flex-col h-full">
