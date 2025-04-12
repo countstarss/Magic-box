@@ -35,6 +35,7 @@ import CategoryManager from "./CategoryManager";
 import { ResizablePanel } from "@/components/ui/resizable";
 import Link from "next/link";
 import { DashboardIcon } from "@radix-ui/react-icons";
+import { AccountSwitcher } from "./account-switcher";
 
 interface NavLinkItem {
   title: string;
@@ -224,26 +225,23 @@ const Nav: React.FC<NavProps> = ({
             <h2 className="font-semibold text-sm">WizMail</h2>
           </div>
         ) : (
-          <div className="flex w-full items-center justify-between px-2 py-2">
+          <div className="flex flex-col w-full items-center justify-between py-2">
             <div className="flex items-center gap-2">
-              <div>
-                <PenBox className="h-6 w-6" />
-              </div>
-              <h2 className="font-semibold text-lg">WizMail</h2>
+              <h2 className="font-semibold text-md">WizMail</h2>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => {
-                setIsCollapsed(true);
-                onCollapsedChange?.(true);
-              }}
-            >
-              <PanelLeftClose className="h-4 w-4" />
-            </Button>
+            
           </div>
         )}
+      </div>
+      <div className='px-2'>
+        <AccountSwitcher 
+          isCollapsed={isCollapsed} 
+          accounts={accounts.map(account => ({
+            label: account.name,
+            email: account.email,
+            icon: account.icon,
+          }))} 
+        />
       </div>
       <div
         className={cn(
@@ -253,21 +251,21 @@ const Nav: React.FC<NavProps> = ({
       >
         <div
           className={cn(
-            "my-2 w-full",
+            "mt-2 w-full",
             isCollapsed ? "flex flex-col items-center" : "justify-start px-2"
           )}
         >
           <Button
-            variant="default"
+            variant="ghost"
             className={cn(
-              "rounded-md bg-primary text-primary-foreground shadow hover:bg-primary/90 transition-all",
+              "rounded-md bg-primary text-primary-foreground shadow transition-all",
               isCollapsed
-                ? "w-10 h-10 p-0 flex items-center justify-center"
-                : "w-full px-4 py-3 flex items-center justify-start"
+                ? "w-9 h-9 p-0 flex items-center justify-center"
+                : "w-full px-4 pt-3 flex items-center justify-start"
             )}
             onClick={() => router.push('/mail/compose')}
           >
-            <PenBox className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+            <PenBox className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
             {!isCollapsed && <span className="font-medium">Compose</span>}
           </Button>
         </div>

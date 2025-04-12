@@ -245,7 +245,7 @@ export function Mail({
             <div className="flex items-center justify-between p-2 border-b">
               <div>
                 {/* 当侧边栏折叠时，在左侧显示展开按钮 */}
-                {isCollapsed && (
+                {isCollapsed ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button 
@@ -261,7 +261,20 @@ export function Mail({
                       Show sidebar
                     </TooltipContent>
                   </Tooltip>
-                )}
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => {
+                      setIsCollapsed(true);
+                      onCollapse(true);
+                    }}
+                  >
+                    <PanelLeftClose className="h-4 w-4" />
+                  </Button>
+                )
+                }
               </div>
               
               {/* 右侧工具栏 */}

@@ -7,10 +7,11 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC<LayoutProps> = async ({ children }) => {
   // 从cookie中获取布局配置和折叠状态
-  const layoutCookie = cookies().get("react-resizable-panels:layout:mail");
-  const collapsedCookie = cookies().get("react-resizable-panels:collapsed");
+  const cookieStore = await cookies();
+  const layoutCookie = cookieStore.get("react-resizable-panels:layout:mail");
+  const collapsedCookie = cookieStore.get("react-resizable-panels:collapsed");
 
   // 解析折叠状态
   const defaultCollapsed = collapsedCookie

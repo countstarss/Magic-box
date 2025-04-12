@@ -298,8 +298,9 @@ export type Mail = (typeof mails)[number]; // 类型名 'Mail' 意为 '邮件'
  */
 export const accounts = [ // 变量名 'accounts' 意为 '账户列表'
   {
-    name: "艾丽西亚·科赫", // Alicia Koch
-    email: "alicia@example.com",
+    name: "Luke King", // Alicia Koch
+    email: "luke@example.com",
+    label: "Vercel",
     icon: ( /* 图标保持不变 */
       <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <title>Vercel</title>
@@ -310,6 +311,7 @@ export const accounts = [ // 变量名 'accounts' 意为 '账户列表'
   {
     name: "艾丽西亚·科赫", // Alicia Koch
     email: "alicia@gmail.com",
+    label: "Gmail",
     icon: ( /* 图标保持不变 */
       <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <title>Gmail</title>
@@ -321,8 +323,9 @@ export const accounts = [ // 变量名 'accounts' 意为 '账户列表'
     ),
   },
   {
-    name: "艾丽西亚·科赫", // Alicia Koch
+    name: "Alicia Koch", // Alicia Koch
     email: "alicia@me.com",
+    label: "iCloud",
     icon: ( /* 图标保持不变 */
       <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <title>iCloud</title>
