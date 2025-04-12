@@ -8,9 +8,7 @@ import {
   PenBox,
   Send,
   Trash2,
-  Settings as SettingsIcon,
-  PanelLeftClose,
-  Plus,
+  Settings as SettingsIcon
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -227,7 +225,19 @@ const Nav: React.FC<NavProps> = ({
         ) : (
           <div className="flex flex-col w-full items-center justify-between py-2">
             <div className="flex items-center gap-2">
-              <h2 className="font-semibold text-md">WizMail</h2>
+              <h2
+                // className="font-sans text-4xl font-extrabold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent"
+                className="font-sans text-2xl font-extrabold bg-gradient-to-r from-black via-neutral-800 to-neutral-500 bg-clip-text text-transparent"
+                style={{
+                  textShadow: `
+                    0 0 5px rgba(0, 0, 0, 0.6),
+                    0 0 10px rgba(0, 0, 0, 0.6),
+                    0 0 20px rgba(0, 0, 0, 0.5)
+                  `
+                }}
+              >
+                WizMail
+              </h2>
             </div>
             
           </div>
