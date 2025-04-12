@@ -50,9 +50,10 @@ import { useMail } from "@/hooks/use-mail"
 
 interface MailDisplayProps {
   mail: EmailMessage | null
+  isServerData?: boolean // 标识是否是从服务器直接传递的数据
 }
 
-export function MailDisplay({ mail }: MailDisplayProps) {
+export function MailDisplay({ mail, isServerData = false }: MailDisplayProps) {
   const today = new Date()
   const router = useRouter()
   const markEmailAsRead = useMarkEmailAsRead()
@@ -63,6 +64,13 @@ export function MailDisplay({ mail }: MailDisplayProps) {
   
   // 使用 useMail hook 获取邮件缓存
   const { getEmail, emailCache } = useMail();
+  
+  // 记录数据来源
+  React.useEffect(() => {
+    if (isServerData && mail) {
+      console.log(`[MailDisplay] 使用服务端传递的邮件数据: ${mail.id}`);
+    }
+  }, [isServerData, mail]);
   
   // 多级备份系统获取邮件数据
   const emailToDisplay = useMemo(() => {

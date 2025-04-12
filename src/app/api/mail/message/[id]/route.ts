@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { enhancedMailService } from "@/lib/server/mail-service-enhanced";
+import { getEmail } from "@/lib/mail";
 
 // 请求计数器，用于在开发模式下检测重复请求
 const requestCounts: Record<string, number> = {};
@@ -24,8 +24,12 @@ export async function GET(
   try {
     console.log(`[API] 获取邮件详情: id=${emailId}`);
 
-    // 使用增强版邮件服务
-    const message = await enhancedMailService.getEmail(emailId);
+    // 使用新的邮件服务
+    const message = await getEmail(emailId);
+
+    if (!message) {
+      return NextResponse.json({ error: "邮件不存在" }, { status: 404 });
+    }
 
     console.log(`[API] 成功获取邮件详情: id=${emailId}`);
 

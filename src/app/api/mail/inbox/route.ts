@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { enhancedMailService } from "@/lib/server/mail-service-enhanced";
+import { getEmails } from "@/lib/mail";
 
 // 为请求创建一个简单的缓存标识
 const generateCacheKey = (limit: number, offset: number, unread: boolean) => {
@@ -29,14 +29,14 @@ export async function GET(request: Request) {
       `[API] 获取邮件: limit=${limit}, offset=${offset}, unread=${unread}`
     );
 
-    // 使用增强版邮件服务
-    const data = await enhancedMailService.getEmails({
+    // 使用新的邮件服务
+    const data = await getEmails({
       limit,
       offset,
       unread,
     });
 
-    console.log(`[API] 成功获取邮件: ${data.data?.length || 0}封`);
+    console.log(`[API] 成功获取邮件: ${data.length || 0}封`);
 
     // 创建响应对象
     const response = NextResponse.json(data);
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
     response.headers.set("Cache-Control", "public, max-age=300"); // 缓存5分钟
     response.headers.set("X-Cache-Key", cacheKey);
 
-    // 直接返回API的响应，保持数据结构与前端期望的一致
+    // 返回响应
     return response;
   } catch (error) {
     console.error("[API] 获取邮件出错:", error);

@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import nylasService from "@/lib/services/nylas-service";
-import mailAccountService from "@/lib/services/mail-account-service";
+import { mailService } from "@/lib/mail";
 
 export default function CallbackPage() {
   const router = useRouter();
@@ -38,15 +38,15 @@ export default function CallbackPage() {
         // 交换授权码获取访问令牌
         const { grantId, emailAccount } = await nylasService.exchangeCodeForToken(code);
         
-        // 保存账户信息
-        mailAccountService.addAccount(grantId, emailAccount);
+        // TODO: 保存账户信息
+        // mailService.addAccount(grantId, emailAccount);
         
         // 设置成功状态
         setStatus("success");
         
         // 延迟1.5秒后重定向到gmail页面
         setTimeout(() => {
-          router.push("/gmail");
+          router.push("/mail");
         }, 1500);
       } catch (error) {
         setStatus("error");

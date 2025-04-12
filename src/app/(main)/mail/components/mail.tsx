@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useResizableSidebar } from "@/hooks/use-resizable-sidebar"
 import { useMail } from "@/hooks/use-mail"
+import { EmailMessage, EmailAccount } from "@/lib/types/nylas-types"
 
 interface MailProps {
   accounts: {
@@ -28,6 +29,8 @@ interface MailProps {
   defaultCollapsed?: boolean
   navCollapsedSize: number
   children: React.ReactNode
+  initialEmails?: EmailMessage[] // 从服务器端获取的初始邮件列表
+  accountInfo?: EmailAccount | null // 从服务器端获取的账户信息
 }
 
 export function Mail({
@@ -36,9 +39,24 @@ export function Mail({
   defaultCollapsed = false,
   navCollapsedSize,
   children,
+  initialEmails,
+  accountInfo
 }: MailProps) {
   // 使用mail hook获取邮件状态和方法
   const { config } = useMail();
+  
+  // 初始化mail hook的数据
+  React.useEffect(() => {
+    if (initialEmails && initialEmails.length > 0) {
+      // 这里可以添加将初始邮件数据加载到全局状态的逻辑
+      console.log('使用服务端提供的初始邮件数据:', initialEmails.length);
+    }
+    
+    if (accountInfo) {
+      // 这里可以添加将账户信息加载到全局状态的逻辑
+      console.log('使用服务端提供的账户信息:', accountInfo.email);
+    }
+  }, [initialEmails, accountInfo]);
   
   // 使用自定义Hook管理侧边栏和布局
   const {
@@ -73,6 +91,7 @@ export function Mail({
           defaultCollapsed={isCollapsed}
           navCollapsedSize={navCollapsedSize}
           onCollapsedChange={onCollapse}
+          accountInfo={accountInfo}
         />
         <ResizableHandle withHandle />
         <ResizablePanel 

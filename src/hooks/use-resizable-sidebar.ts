@@ -2,7 +2,10 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { setCookie, getCookieValue } from "@/lib/cookies";
 import * as ResizablePrimitive from "react-resizable-panels";
 
-// 避免在 hook 内部直接使用 useState 和 useRef，而是创建一个工厂函数
+/**
+ * 创建侧边栏状态的工厂函数
+ * 避免在 hook 内部直接使用 useState 和 useRef
+ */
 function createSidebarState(
   defaultLayout: number[] = [20, 40, 40],
   defaultCollapsed: boolean = false,
@@ -46,9 +49,12 @@ function createSidebarState(
   };
 }
 
-// 简化后的 hook
+/**
+ * 可调整大小的侧边栏 Hook
+ * 提供了折叠/展开、调整大小以及持久化功能
+ */
 export const useResizableSidebar = ({
-  defaultLayout,
+  defaultLayout = [20, 40, 40],
   defaultCollapsed = false,
   navCollapsedSize,
   cookieKey = "sidebar",
@@ -60,7 +66,7 @@ export const useResizableSidebar = ({
 }) => {
   // 提前准备好所有需要的初始状态，避免条件性调用 hooks
   const initialState = createSidebarState(
-    defaultLayout || [20, 40, 40],
+    defaultLayout,
     defaultCollapsed,
     cookieKey
   );
@@ -73,6 +79,7 @@ export const useResizableSidebar = ({
     initialState.initialCollapsed
   );
 
+  // 处理布局变化
   const onLayoutChange = useCallback(
     (sizes: number[]) => {
       if (sizes.length > 0 && typeof window !== "undefined") {
@@ -83,6 +90,7 @@ export const useResizableSidebar = ({
     [cookieKey]
   );
 
+  // 处理折叠状态变化
   const onCollapse = useCallback(
     (collapsed: boolean) => {
       if (typeof window !== "undefined") {
@@ -93,6 +101,7 @@ export const useResizableSidebar = ({
     [cookieKey]
   );
 
+  // 切换侧边栏折叠状态
   const toggleSidebar = useCallback(() => {
     setIsCollapsed((prev) => {
       const newState = !prev;
@@ -103,6 +112,48 @@ export const useResizableSidebar = ({
     });
   }, [cookieKey]);
 
+  // 重置面板布局到默认值
+  const resetLayout = useCallback(() => {
+    setSizes(defaultLayout);
+    if (typeof window !== "undefined") {
+      setCookie(`${cookieKey}-layout`, JSON.stringify(defaultLayout));
+    }
+    // 如果panelGroupRef可用，尝试通过API重置
+    if (panelGroupRef.current) {
+      try {
+        // 使用setTimeout确保在下一个渲染周期执行
+        setTimeout(() => {
+          if (panelGroupRef.current) {
+            // 尝试调用面板的setLayout方法
+            const panel = panelGroupRef.current as any;
+            if (panel.setLayout) {
+              panel.setLayout(defaultLayout);
+            } else {
+              console.warn("面板组没有setLayout方法");
+            }
+          }
+        }, 0);
+      } catch (error) {
+        console.error("重置面板布局失败:", error);
+      }
+    }
+  }, [defaultLayout, cookieKey]);
+
+  // 当面板引用改变时，应用当前状态
+  useEffect(() => {
+    if (panelGroupRef.current && isCollapsed) {
+      // 对于已折叠的侧边栏，确保DOM状态正确
+      try {
+        const panel = document.querySelector("[data-panel-id]");
+        if (panel) {
+          panel.setAttribute("data-state", "collapsed");
+        }
+      } catch (error) {
+        console.error("设置面板折叠状态失败:", error);
+      }
+    }
+  }, [panelGroupRef, isCollapsed]);
+
   return {
     isCollapsed,
     sizes,
@@ -110,5 +161,6 @@ export const useResizableSidebar = ({
     onLayoutChange,
     onCollapse,
     toggleSidebar,
+    resetLayout,
   };
 };

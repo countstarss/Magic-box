@@ -8,7 +8,8 @@ import {
   PenBox,
   Send,
   Trash2,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  User
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -33,7 +34,7 @@ import { ResizablePanel } from "@/components/ui/resizable";
 import Link from "next/link";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import { AccountSwitcher } from "./account-switcher";
-import { EmailMessage } from "@/lib/types/nylas-types";
+import { EmailMessage, EmailAccount } from "@/lib/types/nylas-types";
 
 interface NavLinkItem {
   title: string;
@@ -46,16 +47,17 @@ interface NavLinkItem {
 }
 
 interface NavProps {
-  accounts?: {
+  accounts: {
     name: string;
     email: string;
     icon: React.ReactNode;
   }[];
-  mails?: EmailMessage[];
-  defaultLayout?: number[];
-  defaultCollapsed?: boolean;
+  mails: EmailMessage[];
+  defaultLayout: number[];
+  defaultCollapsed: boolean;
   navCollapsedSize: number;
   onCollapsedChange?: (collapsed: boolean) => void;
+  accountInfo?: EmailAccount | null;
 }
 
 const Nav: React.FC<NavProps> = ({
@@ -65,6 +67,7 @@ const Nav: React.FC<NavProps> = ({
   defaultCollapsed = false,
   navCollapsedSize,
   onCollapsedChange,
+  accountInfo
 }) => {
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
   const [userCategories] = useAtom(userCategoriesAtom);
@@ -199,6 +202,30 @@ const Nav: React.FC<NavProps> = ({
     }
   }, [defaultCollapsed, onCollapsedChange]);
 
+  // 使用服务端提供的账户信息
+  React.useEffect(() => {
+    if (accountInfo) {
+      console.log('导航栏使用服务端提供的账户信息:', accountInfo.email);
+      // 这里可以添加将账户信息用于导航栏的逻辑
+    }
+  }, [accountInfo]);
+
+  // 在账户切换组件中使用服务端账户数据
+  const renderAccounts = () => {
+    // 如果有服务端提供的账户信息，优先使用
+    if (accountInfo) {
+      const serverAccount = {
+        name: accountInfo.name,
+        email: accountInfo.email,
+        icon: <User className="h-4 w-4" />,
+      };
+      
+      return [serverAccount, ...accounts.filter(acc => acc.email !== accountInfo.email)];
+    }
+    
+    return accounts;
+  };
+
   return (
     <ResizablePanel
       defaultSize={defaultLayout[0]}
@@ -254,7 +281,7 @@ const Nav: React.FC<NavProps> = ({
       <div className='px-2'>
         <AccountSwitcher 
           isCollapsed={isCollapsed} 
-          accounts={accounts?.map(account => ({
+          accounts={renderAccounts().map(account => ({
             label: account.name,
             email: account.email,
             icon: account.icon,

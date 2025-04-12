@@ -31,18 +31,23 @@ import { useEmails, useEmailDetail, useMarkEmailAsRead } from "@/hooks/use-mail-
 import { EmailMessage } from "@/lib/types/nylas-types"
 import { useAtom } from "jotai"
 import { mailStateAtom, persistedMailStateAtom, selectedMailAtom, initializeMailState } from "@/lib/mail-state"
+import { EmailAccount } from "@/lib/types/nylas-types"
 
 interface MailListProps {
   defaultLayout?: number[]
   children?: React.ReactNode
   layoutDirection?: "horizontal" | "vertical"
   isVerticalLayout?: boolean
+  initialEmails?: EmailMessage[] // 从服务器端获取的初始邮件列表
+  accountInfo?: EmailAccount | null // 从服务器端获取的账户信息
 }
 
 const MailScroll: React.FC<MailListProps> = ({
   defaultLayout = [20, 32, 48],
   layoutDirection = "horizontal",
-  isVerticalLayout = false
+  isVerticalLayout = false,
+  initialEmails = [],
+  accountInfo = null
 }) => {
   const { currentFolder } = useMail();
   const pathname = usePathname();
@@ -62,8 +67,10 @@ const MailScroll: React.FC<MailListProps> = ({
     unread: false 
   }), []);
   
-  // 获取邮件列表
-  const { data: emails = [], isLoading } = useEmails(emailQueryOptions);
+  // 获取邮件列表 - 如果有初始数据就使用，否则从API获取
+  const { data: emails = initialEmails, isLoading } = useEmails(emailQueryOptions, {
+    initialData: initialEmails.length > 0 ? initialEmails : undefined
+  });
   
   // 创建一个函数来从邮件列表中查找选定的邮件
   const findEmailInList = React.useCallback((id: string | null) => {
@@ -296,8 +303,9 @@ const MailScroll: React.FC<MailListProps> = ({
   const MailDisplayPanel = React.useMemo(() => (
     <MailDisplay
       mail={currentEmail}
+      isServerData={!!initialEmails && initialEmails.some(e => e.id === currentEmail?.id)}
     />
-  ), [currentEmail]);
+  ), [currentEmail, initialEmails]);
 
   return (
     <ResizablePanelGroup

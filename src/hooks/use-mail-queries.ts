@@ -1,5 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { EmailMessage } from "@/lib/types/nylas-types";
+import enhancedMailService, {
+  MailQueryOptions,
+} from "@/lib/services/enhanced-mail-service";
 
 /**
  * 邮件API请求错误
@@ -22,6 +25,10 @@ export interface EmailQueryOptions {
   offset?: number;
   unread?: boolean;
 }
+
+//=========================================================
+// 基础API邮件查询功能
+//=========================================================
 
 /**
  * 获取邮件列表
@@ -132,10 +139,60 @@ export async function fetchEmailDetail(
   };
 }
 
+//=========================================================
+// 增强版邮件查询功能 - 基于增强服务的实现
+//=========================================================
+
+/**
+ * 获取邮件列表 (增强版)
+ */
+export async function fetchEnhancedEmails(
+  options: MailQueryOptions = {}
+): Promise<EmailMessage[]> {
+  try {
+    return await enhancedMailService.getEmails(options);
+  } catch (error) {
+    console.error("获取邮件列表失败:", error);
+    throw new MailApiError(
+      error instanceof Error ? error.message : "获取邮件失败",
+      500
+    );
+  }
+}
+
+/**
+ * 获取单封邮件详情 (增强版)
+ */
+export async function fetchEnhancedEmailDetail(
+  emailId: string | null,
+  forceRefresh: boolean = false
+): Promise<EmailMessage | null> {
+  if (!emailId) {
+    throw new MailApiError("邮件ID不能为空", 400);
+  }
+
+  try {
+    return await enhancedMailService.getEmail(emailId, forceRefresh);
+  } catch (error) {
+    console.error(`获取邮件 ${emailId} 详情失败:`, error);
+    throw new MailApiError(
+      error instanceof Error ? error.message : "获取邮件详情失败",
+      500
+    );
+  }
+}
+
+//=========================================================
+// React Query Hooks - 基础版
+//=========================================================
+
 /**
  * 邮件列表React Query Hook
  */
-export function useEmails(options: EmailQueryOptions = {}) {
+export function useEmails(
+  options: EmailQueryOptions = {},
+  queryOptions: { initialData?: EmailMessage[] } = {}
+) {
   return useQuery({
     queryKey: ["emails", options],
     queryFn: () => fetchEmails(options),
@@ -144,6 +201,7 @@ export function useEmails(options: EmailQueryOptions = {}) {
     retry: 2, // 失败时最多重试2次
     refetchOnMount: false, // 组件挂载时不自动重新获取
     refetchOnWindowFocus: false, // 窗口获取焦点时不自动重新获取
+    ...queryOptions, // 传递额外的查询选项，如initialData
   });
 }
 
@@ -239,6 +297,131 @@ export function useRefreshEmails() {
     onSuccess: () => {
       // 使所有邮件查询失效，触发重新获取
       queryClient.invalidateQueries({ queryKey: ["emails"] });
+    },
+  });
+}
+
+//=========================================================
+// React Query Hooks - 增强版
+//=========================================================
+
+/**
+ * 邮件列表React Query Hook (增强版)
+ */
+export function useEnhancedEmails(options: MailQueryOptions = {}) {
+  return useQuery({
+    queryKey: ["enhanced-emails", options],
+    queryFn: () => fetchEnhancedEmails(options),
+    staleTime: 1000 * 60 * 2, // 2分钟内不重新获取
+    retry: 2, // 失败时最多重试2次
+  });
+}
+
+/**
+ * 邮件详情React Query Hook (增强版)
+ */
+export function useEnhancedEmailDetail(
+  emailId: string | null,
+  forceRefresh: boolean = false
+) {
+  return useQuery({
+    queryKey: ["enhanced-email", emailId, forceRefresh],
+    queryFn: () => fetchEnhancedEmailDetail(emailId, forceRefresh),
+    enabled: !!emailId, // 只有当emailId存在时才执行查询
+    staleTime: 1000 * 60 * 5, // 5分钟内不重新获取
+    retry: 2, // 失败时最多重试2次
+  });
+}
+
+/**
+ * 标记邮件为已读的Mutation (增强版)
+ */
+export function useEnhancedMarkEmailAsRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (emailId: string) => {
+      const success = await enhancedMailService.markAsRead(emailId);
+      if (!success) {
+        throw new Error("标记邮件已读失败");
+      }
+      return { success };
+    },
+    onSuccess: (_, emailId) => {
+      // 标记成功后，更新缓存中的邮件信息
+      queryClient.setQueryData(
+        ["enhanced-email", emailId],
+        (oldData: EmailMessage | undefined) => {
+          if (!oldData) return oldData;
+          return { ...oldData, unread: false };
+        }
+      );
+
+      // 同时更新邮件列表缓存
+      queryClient.invalidateQueries({ queryKey: ["enhanced-emails"] });
+    },
+  });
+}
+
+/**
+ * 标记邮件为未读的Mutation (增强版)
+ */
+export function useEnhancedMarkEmailAsUnread() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (emailId: string) => {
+      const success = await enhancedMailService.markAsUnread(emailId);
+      if (!success) {
+        throw new Error("标记邮件未读失败");
+      }
+      return { success };
+    },
+    onSuccess: (_, emailId) => {
+      // 标记成功后，更新缓存中的邮件信息
+      queryClient.setQueryData(
+        ["enhanced-email", emailId],
+        (oldData: EmailMessage | undefined) => {
+          if (!oldData) return oldData;
+          return { ...oldData, unread: true };
+        }
+      );
+
+      // 同时更新邮件列表缓存
+      queryClient.invalidateQueries({ queryKey: ["enhanced-emails"] });
+    },
+  });
+}
+
+/**
+ * 刷新邮件列表的Mutation (增强版)
+ */
+export function useEnhancedRefreshEmails() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (options: MailQueryOptions = {}) => {
+      const success = await enhancedMailService.refreshCache(options);
+      if (!success) {
+        throw new Error("刷新邮件列表失败");
+      }
+      return { success };
+    },
+    onSuccess: () => {
+      // 使所有邮件查询失效，触发重新获取
+      queryClient.invalidateQueries({ queryKey: ["enhanced-emails"] });
+    },
+  });
+}
+
+/**
+ * 清理过期缓存的Mutation (增强版)
+ */
+export function useEnhancedCleanupCache() {
+  return useMutation({
+    mutationFn: async () => {
+      const count = await enhancedMailService.cleanupCache();
+      return { count };
     },
   });
 }
