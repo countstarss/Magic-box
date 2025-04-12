@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,21 +10,17 @@ import { GmailMailList } from "./gmail-mail-list";
 import { GmailMailDisplay } from "./gmail-mail-display";
 import { GmailAccount } from "./gmail-account";
 import { cn } from "@/lib/utils";
-import { EmailAccount, EmailMessage } from "@/lib/types/nylas-types";
+import { EmailAccount } from "@/lib/types/nylas-types";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-
-// 硬编码API key和账户信息
-const API_KEY = "nyk_v0_xeZH9pWZZxlRdL4GBLivGNYMKaAGduLzhJO1u91CTIU57bV0YDpFuqPnP7v7uRtp";
-const API_URL = "https://api.us.nylas.com";
-const GRANT_ID = "9c575cb5-9f41-45db-a5fd-02da4ea72514"; // 使用实际授权ID
+import { useEmails, useEmailDetail, useRefreshEmails } from "@/hooks/use-mail-queries";
 
 // 预设的已授权Gmail账户信息
 const AUTHORIZED_ACCOUNT: EmailAccount = {
   id: "preset-account-id",
-  grantId: GRANT_ID,
+  grantId: "9c575cb5-9f41-45db-a5fd-02da4ea72514",
   email: "countstarrss404@gmail.com",
   name: "Count Starrss",
   provider: "gmail",
@@ -47,175 +43,27 @@ export function GmailView({
 }: GmailViewProps) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [account] = useState<EmailAccount>(AUTHORIZED_ACCOUNT);
-  const [emails, setEmails] = useState<EmailMessage[]>([]);
-  const [selectedEmail, setSelectedEmail] = useState<EmailMessage | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const router = useRouter();
 
-  // 直接从API获取邮件
-  const fetchEmails = async (showUnreadOnly = false) => {
-    setRefreshing(true);
-    setLoading(true);
-    
-    try {
-      console.log("正在直接从API获取邮件...");
-      
-      // 构建查询参数
-      const queryParams = new URLSearchParams({
-        limit: "20",
-        offset: "0",
-      });
-      
-      if (showUnreadOnly) {
-        queryParams.append("unread", "true");
-      }
-      
-      // 直接调用Nylas API
-      const response = await fetch(
-        `${API_URL}/v3/grants/${GRANT_ID}/messages?${queryParams.toString()}`,
-        {
-          headers: {
-            "Authorization": `Bearer ${API_KEY}`,
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-          }
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error(`API错误: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log("成功获取邮件:", data.data?.length || 0);
-      
-      if (data.data && data.data.length > 0) {
-        // 将API响应转换为EmailMessage格式
-        const mappedEmails: EmailMessage[] = data.data.map((message: any) => ({
-          id: message.id,
-          subject: message.subject || "(无主题)",
-          snippet: message.snippet || "",
-          body: message.body,
-          sender: {
-            name: message.from?.[0]?.name || "未知",
-            email: message.from?.[0]?.email || "unknown@email.com",
-          },
-          recipients: (message.to || []).map((to: any) => ({
-            name: to.name || "未知",
-            email: to.email || "",
-          })),
-          date: new Date(message.date * 1000),
-          unread: message.unread || false,
-          hasAttachments: !!message.attachments?.length,
-          attachments: message.attachments?.map((att: any) => ({
-            id: att.id,
-            filename: att.filename,
-            contentType: att.content_type,
-            size: att.size,
-            contentId: att.content_id,
-          })),
-        }));
-        
-        setEmails(mappedEmails);
-        
-        toast({
-          title: "邮件加载成功",
-          description: `已成功加载${mappedEmails.length}封邮件`
-        });
-      } else {
-        console.log("API未返回邮件");
-        setEmails([]);
-        toast({
-          title: "未找到邮件",
-          description: "您的邮箱中没有符合条件的邮件"
-        });
-      }
-    } catch (error) {
-      console.error("加载邮件出错:", error);
-      toast({
-        title: "加载邮件失败",
-        description: error instanceof Error ? error.message : "未知错误",
-        variant: "destructive",
-      });
-      
-      // 如果API失败，设置空数组
-      setEmails([]);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+  // 使用React Query获取邮件列表
+  const { 
+    data: emails = [], 
+    isLoading: emailsLoading,
+    error: emailsError
+  } = useEmails({ 
+    unread: filter === "unread"
+  });
 
-  // 直接从API获取邮件详情
-  const fetchEmailDetail = async (emailId: string) => {
-    setLoading(true);
-    
-    try {
-      console.log(`正在直接从API获取邮件详情: ${emailId}`);
-      
-      const response = await fetch(
-        `${API_URL}/v3/grants/${GRANT_ID}/messages/${emailId}`,
-        {
-          headers: {
-            "Authorization": `Bearer ${API_KEY}`,
-            "Accept": "application/json"
-          }
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error(`API错误: ${response.status} ${response.statusText}`);
-      }
-      
-      const message = await response.json();
-      
-      // 将API响应转换为EmailMessage格式
-      const emailData: EmailMessage = {
-        id: message.id,
-        subject: message.subject || "(无主题)",
-        snippet: message.snippet || "",
-        body: message.body,
-        sender: {
-          name: message.from?.[0]?.name || "未知",
-          email: message.from?.[0]?.email || "unknown@email.com",
-        },
-        recipients: (message.to || []).map((to: any) => ({
-          name: to.name || "未知",
-          email: to.email || "",
-        })),
-        date: new Date(message.date * 1000),
-        unread: message.unread || false,
-        hasAttachments: !!message.attachments?.length,
-        attachments: message.attachments?.map((att: any) => ({
-          id: att.id,
-          filename: att.filename,
-          contentType: att.content_type,
-          size: att.size,
-          contentId: att.content_id,
-        })),
-      };
-      
-      setSelectedEmail(emailData);
-    } catch (error) {
-      console.error("获取邮件详情出错:", error);
-      toast({
-        title: "加载邮件详情失败",
-        description: error instanceof Error ? error.message : "未知错误",
-        variant: "destructive",
-      });
-      
-      setSelectedEmail(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // 使用React Query获取选中邮件的详情
+  const { 
+    data: selectedEmail, 
+    isLoading: emailDetailLoading
+  } = useEmailDetail(selectedEmailId);
 
-  // 初始化和过滤器变更时加载邮件
-  useEffect(() => {
-    fetchEmails(filter === "unread");
-  }, [filter]);
+  // 使用React Query的mutation来刷新邮件
+  const { mutate: refreshEmails, isPending: refreshing } = useRefreshEmails();
 
   // 处理标签切换
   const handleTabChange = (value: string) => {
@@ -223,14 +71,37 @@ export function GmailView({
   };
 
   // 刷新邮件列表
-  const handleRefresh = async () => {
-    await fetchEmails(filter === "unread");
+  const handleRefresh = () => {
+    refreshEmails(undefined, {
+      onSuccess: () => {
+        toast({
+          title: "邮件已刷新",
+          description: "邮件列表已更新为最新数据"
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "刷新失败",
+          description: error instanceof Error ? error.message : "未知错误",
+          variant: "destructive"
+        });
+      }
+    });
   };
 
   // 处理邮件选择
-  const handleEmailSelect = async (emailId: string) => {
-    await fetchEmailDetail(emailId);
+  const handleEmailSelect = (emailId: string) => {
+    setSelectedEmailId(emailId);
   };
+
+  // 如果初始加载出错，显示错误提示
+  if (emailsError) {
+    toast({
+      title: "加载邮件失败",
+      description: emailsError instanceof Error ? emailsError.message : "未知错误",
+      variant: "destructive"
+    });
+  }
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -315,7 +186,7 @@ export function GmailView({
           <div className="p-2">
             {!isCollapsed && (
               <div className="text-xs font-medium text-muted-foreground">
-                已直接连接到Gmail API
+                已通过API路由连接到Gmail
               </div>
             )}
           </div>
@@ -349,14 +220,14 @@ export function GmailView({
               <GmailMailList
                 emails={emails}
                 onSelectEmail={handleEmailSelect}
-                loading={loading || refreshing}
+                loading={emailsLoading || refreshing}
               />
             </TabsContent>
             <TabsContent value="unread" className="m-0">
               <GmailMailList
                 emails={emails.filter(item => item.unread)}
                 onSelectEmail={handleEmailSelect}
-                loading={loading || refreshing}
+                loading={emailsLoading || refreshing}
               />
             </TabsContent>
           </Tabs>
@@ -364,8 +235,8 @@ export function GmailView({
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={defaultLayout[2]}>
           <GmailMailDisplay
-            email={selectedEmail}
-            loading={loading}
+            email={selectedEmail || null}
+            loading={emailDetailLoading}
           />
         </ResizablePanel>
       </ResizablePanelGroup>

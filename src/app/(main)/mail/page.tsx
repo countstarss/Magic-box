@@ -4,12 +4,13 @@ import MailScroll from "./components/MailScroll";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle } from "lucide-react";
 
-export default function MailPage({
+export default async function MailPage({
   searchParams,
 }: {
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  const layout = cookies().get("react-resizable-panels:layout:mail");
+  const cookieService = await cookies();
+  const layout = cookieService.get("react-resizable-panels:layout:mail");
   const defaultLayout = layout ? JSON.parse(layout.value) : undefined;
 
   // Check if we just authenticated successfully

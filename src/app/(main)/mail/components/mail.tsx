@@ -171,12 +171,6 @@ export function Mail({
     )}`;
   }, [isCollapsed, sizes, navCollapsedSize, defaultLayout]);
   
-  // 切换布局方向
-  const toggleLayoutDirection = React.useCallback(() => {
-    const newValue = !isVerticalLayout;
-    setIsVerticalLayout(newValue);
-    document.cookie = `mail-layout-direction=${newValue ? 'vertical' : 'horizontal'}; path=/; max-age=31536000`;
-  }, [isVerticalLayout]);
 
   // 切换侧边栏折叠状态
   const toggleSidebar = React.useCallback(() => {
@@ -277,36 +271,9 @@ export function Mail({
                 }
               </div>
               
-              {/* 右侧工具栏 */}
-              <div className="flex items-center gap-1">
-                {/* 布局切换按钮 */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={toggleLayoutDirection}
-                    >
-                      {isVerticalLayout ? <LayoutTemplate className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {isVerticalLayout ? "Switch to horizontal layout" : "Switch to vertical layout"}
-                  </TooltipContent>
-                </Tooltip>
-              </div>
             </div>
             <div className="flex-1 overflow-hidden">
-              {/* 根据布局方向选择渲染子组件或自定义布局 */}
-              {React.Children.map(children, child => 
-                React.isValidElement(child) ? 
-                  React.cloneElement(child as React.ReactElement<any>, { 
-                    isVerticalLayout,
-                    layoutDirection: isVerticalLayout ? "vertical" : "horizontal"
-                  }) : 
-                  child
-              )}
+              {children}
             </div>
           </div>
         </ResizablePanel>
