@@ -217,7 +217,7 @@ const Nav: React.FC<NavProps> = ({
         isCollapsed ? "items-center min-w-[80px]" : "min-w-[240px]"
       )}
     >
-      <div className="flex items-center p-4">
+      <div className="flex items-center p-4 pb-2">
         {isCollapsed ? (
           <div className="flex items-center gap-2">
             <h2 className="font-semibold text-sm">WizMail</h2>
