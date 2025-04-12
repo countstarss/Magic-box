@@ -19,7 +19,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { type Mail } from "../../../../lib/data"
 import { useMail } from "@/hooks/use-mail"
 import { MailDisplay } from "./mail-display"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -28,6 +27,8 @@ import { Badge } from "@/components/ui/badge"
 import { getBadgeVariantFromLabel } from "./badgeHighlight"
 import { AnimatePresence, motion } from "framer-motion"
 import { usePathname } from "next/navigation"
+import { useEmails } from "@/hooks/use-mail-queries"
+import { EmailMessage } from "@/lib/types/nylas-types"
 
 interface MailListProps {
   defaultLayout?: number[]
@@ -41,24 +42,25 @@ const MailScroll: React.FC<MailListProps> = ({
   layoutDirection = "horizontal",
   isVerticalLayout = false
 }) => {
-  const { config, setConfig, markAsRead, getFilteredMails, currentFolder } = useMail();
+  const { config, setConfig, markAsRead, currentFolder } = useMail();
   const pathname = usePathname();
+  
+  // Get emails from the API using the useEmails hook
+  const { data: emails = [], isLoading } = useEmails({
+    limit: 50,
+    unread: false
+  });
   
   // 确定布局方向
   const direction = layoutDirection === "vertical" || isVerticalLayout ? "vertical" : "horizontal";
 
-  // 获取当前文件夹的邮件
-  const folderMails = React.useMemo(() => 
-    getFilteredMails(currentFolder), 
-    [getFilteredMails, currentFolder, config.mails]);
-
   const handleMailClick = (mailId: string) => {
-    setConfig(prev => ({ ...prev, selected: mailId }));
+    setConfig((prev: any) => ({ ...prev, selected: mailId }));
     markAsRead(mailId);
   };
 
   // 渲染邮件列表的辅助函数
-  const renderMailList = (mailsToRender: Mail[]) => (
+  const renderMailList = (mailsToRender: EmailMessage[]) => (
     <div className="flex flex-col gap-2 p-4 pt-0">
       <AnimatePresence initial={false}>
         {mailsToRender.map((item) => (
@@ -78,8 +80,8 @@ const MailScroll: React.FC<MailListProps> = ({
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center">
                 <div className="flex items-center gap-2">
-                  <div className="font-semibold">{item.name}</div>
-                  {!item.read && (
+                  <div className="font-semibold">{item.sender.name}</div>
+                  {item.unread && (
                     <span className="flex h-2 w-2 rounded-full bg-blue-600" />
                   )}
                 </div>
@@ -99,9 +101,9 @@ const MailScroll: React.FC<MailListProps> = ({
               <div className="text-xs font-medium">{item.subject}</div>
             </div>
             <div className="line-clamp-2 text-xs text-muted-foreground">
-              {item.text.substring(0, 300)}
+              {item.snippet}
             </div>
-            {item.labels.length ? (
+            {item.labels && item.labels.length > 0 ? (
               <div className="flex items-center gap-2">
                 {item.labels.map((label) => (
                   <Badge key={label} variant={getBadgeVariantFromLabel(label)}>
@@ -117,9 +119,9 @@ const MailScroll: React.FC<MailListProps> = ({
   );
 
   // 为每个选项卡创建过滤后的邮件列表
-  const allMails = folderMails;
-  const unreadMails = folderMails.filter(mail => !mail.read);
-  const importantMails = folderMails.filter(mail => mail.labels.includes('important') || mail.labels.includes('重要'));
+  const allMails = emails;
+  const unreadMails = emails.filter(mail => mail.unread);
+  const importantMails = emails.filter(mail => mail.labels?.includes('important') || mail.labels?.includes('重要'));
 
   // 计算滚动区域的高度
   const scrollHeight = direction === "vertical" 
@@ -151,26 +153,59 @@ const MailScroll: React.FC<MailListProps> = ({
       </div>
       <TabsContent value="all" className="m-0">
         <ScrollArea className={scrollHeight}>
-          {renderMailList(allMails)}
+          {isLoading ? (
+            <div className="flex justify-center items-center h-32">
+              <p className="text-muted-foreground">Loading emails...</p>
+            </div>
+          ) : allMails.length === 0 ? (
+            <div className="flex justify-center items-center h-32">
+              <p className="text-muted-foreground">No emails found</p>
+            </div>
+          ) : (
+            renderMailList(allMails)
+          )}
         </ScrollArea>
       </TabsContent>
       <TabsContent value="unread" className="m-0">
         <ScrollArea className={scrollHeight}>
-          {renderMailList(unreadMails)}
+          {isLoading ? (
+            <div className="flex justify-center items-center h-32">
+              <p className="text-muted-foreground">Loading emails...</p>
+            </div>
+          ) : unreadMails.length === 0 ? (
+            <div className="flex justify-center items-center h-32">
+              <p className="text-muted-foreground">No unread emails</p>
+            </div>
+          ) : (
+            renderMailList(unreadMails)
+          )}
         </ScrollArea>
       </TabsContent>
       <TabsContent value="important" className="m-0">
         <ScrollArea className={scrollHeight}>
-          {renderMailList(importantMails)}
+          {isLoading ? (
+            <div className="flex justify-center items-center h-32">
+              <p className="text-muted-foreground">Loading emails...</p>
+            </div>
+          ) : importantMails.length === 0 ? (
+            <div className="flex justify-center items-center h-32">
+              <p className="text-muted-foreground">No important emails</p>
+            </div>
+          ) : (
+            renderMailList(importantMails)
+          )}
         </ScrollArea>
       </TabsContent>
     </Tabs>
   );
 
+  // Find the selected email
+  const selectedEmail = emails.find(email => email.id === config.selected);
+
   // 邮件显示面板内容
   const mailDisplayPanel = (
     <MailDisplay
-      mail={config.mails.find((item) => item.id === config.selected) || null}
+      mail={selectedEmail || null}
     />
   );
 

@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/resizable"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import Nav from "./nav"
-import { type Mail as TMail } from "@/lib/data"
 import { Button } from "@/components/ui/button"
 import { PanelLeft, PanelLeftClose } from "lucide-react"
 import {
@@ -17,6 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { useResizableSidebar } from "@/hooks/use-resizable-sidebar"
+import { useEmails } from "@/hooks/use-mail-queries"
 
 interface MailProps {
   accounts: {
@@ -24,7 +24,6 @@ interface MailProps {
     email: string
     icon: React.ReactNode
   }[]
-  mails: TMail[]
   defaultLayout: number[] | undefined
   defaultCollapsed?: boolean
   navCollapsedSize: number
@@ -33,12 +32,20 @@ interface MailProps {
 
 export function Mail({
   accounts,
-  mails,
   defaultLayout = [16, 32, 48],
   defaultCollapsed = false,
   navCollapsedSize,
   children,
 }: MailProps) {
+  // 使用邮件查询钩子获取邮件列表
+  const { 
+    data: emails = [], 
+    isLoading,
+    error
+  } = useEmails({ 
+    unread: false,
+    limit: 50  // 获取更多邮件
+  });
   
   // 使用自定义Hook管理侧边栏和布局
   const {
@@ -68,7 +75,7 @@ export function Mail({
       >
         <Nav
           accounts={accounts}
-          mails={mails}
+          mails={emails}
           defaultLayout={initialLayout.current}
           defaultCollapsed={isCollapsed}
           navCollapsedSize={navCollapsedSize}

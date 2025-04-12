@@ -11,6 +11,7 @@ import {
   ViewType,
 } from "@/lib/types/local-storage";
 
+// MARK: 处理后台UI
 // 为了解决计算属性问题，定义具体的store名称
 const UI_PREFERENCES = "uiPreferences";
 const RECENTLY_VIEWED = "recentlyViewed";

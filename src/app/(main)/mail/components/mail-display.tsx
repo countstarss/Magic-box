@@ -1,7 +1,4 @@
-import {addDays} from "date-fns/addDays"
-import {addHours} from "date-fns/addHours"
-import {format} from "date-fns/format"
-import {nextSaturday} from "date-fns/nextSaturday"
+import { format, addDays, addHours, nextSaturday } from "date-fns"
 import {
   Archive,
   ArchiveX,
@@ -14,6 +11,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import React from "react"
 
 import {
   DropdownMenuContent,
@@ -44,29 +42,24 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Mail } from "../../../../lib/data"
 import { useMail } from "@/hooks/use-mail"
+import { EmailMessage } from "@/lib/types/nylas-types"
+import { useMarkEmailAsRead } from "@/hooks/use-mail-queries"
 
 interface MailDisplayProps {
-  mail: Mail | null
+  mail: EmailMessage | null
 }
 
 export function MailDisplay({ mail }: MailDisplayProps) {
   const today = new Date()
   const { setConfig } = useMail()
   const router = useRouter()
+  const markEmailAsRead = useMarkEmailAsRead()
 
   // 归档邮件
   const handleArchive = () => {
     if (!mail) return
-    setConfig(prev => ({
-      ...prev,
-      mails: prev.mails.map(m => 
-        m.id === mail.id 
-          ? { ...m, folder: "archive" }
-          : m
-      )
-    }))
+    
     toast.success(`Email archived`, {
       description: `"${mail.subject}" has been moved to archive`,
       position: "bottom-right",
@@ -76,14 +69,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
   // 移到垃圾邮件
   const handleMoveToJunk = () => {
     if (!mail) return
-    setConfig(prev => ({
-      ...prev,
-      mails: prev.mails.map(m => 
-        m.id === mail.id 
-          ? { ...m, folder: "junk" }
-          : m
-      )
-    }))
+    
     toast.success(`Email moved to junk`, {
       description: `"${mail.subject}" has been moved to junk folder`,
       position: "bottom-right",
@@ -93,14 +79,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
   // 移到垃圾箱
   const handleMoveToTrash = () => {
     if (!mail) return
-    setConfig(prev => ({
-      ...prev,
-      mails: prev.mails.map(m => 
-        m.id === mail.id 
-          ? { ...m, folder: "trash" }
-          : m
-      )
-    }))
+    
     toast.success(`Email trashed`, {
       description: `"${mail.subject}" has been moved to trash`,
       position: "bottom-right",
@@ -110,14 +89,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
   // 标记为未读
   const handleMarkAsUnread = () => {
     if (!mail) return
-    setConfig(prev => ({
-      ...prev,
-      mails: prev.mails.map(m => 
-        m.id === mail.id 
-          ? { ...m, read: false }
-          : m
-      )
-    }))
+    
     toast.success(`Marked as unread`, {
       description: `"${mail.subject}" has been marked as unread`,
       position: "bottom-right",
@@ -127,21 +99,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
   // 添加星标
   const handleStarThread = () => {
     if (!mail) return
-    const hasLabel = mail.labels.includes("important")
-    
-    setConfig(prev => ({
-      ...prev,
-      mails: prev.mails.map(m => 
-        m.id === mail.id 
-          ? { 
-              ...m, 
-              labels: hasLabel 
-                ? m.labels.filter(label => label !== "important") 
-                : [...m.labels, "important"] 
-            }
-          : m
-      )
-    }))
+    const hasLabel = mail.labels?.includes("important") || false
     
     toast.success(hasLabel ? `Star removed` : `Starred`, {
       description: hasLabel 
@@ -155,9 +113,9 @@ export function MailDisplay({ mail }: MailDisplayProps) {
   const handleReply = () => {
     if (!mail) return
     const query = new URLSearchParams({
-      to: mail.email,
+      to: mail.sender.email,
       subject: `Re: ${mail.subject}`,
-      content: `\n\n--- Original message from ${mail.name} (${mail.email}) ---\n${mail.text}`
+      content: `\n\n--- Original message from ${mail.sender.name} (${mail.sender.email}) ---\n${mail.snippet}`
     }).toString()
     
     router.push(`/mail/compose?${query}`)
@@ -167,9 +125,9 @@ export function MailDisplay({ mail }: MailDisplayProps) {
   const handleReplyAll = () => {
     if (!mail) return
     const query = new URLSearchParams({
-      to: mail.email,
+      to: mail.sender.email,
       subject: `Re: ${mail.subject}`,
-      content: `\n\n--- Original message from ${mail.name} (${mail.email}) ---\n${mail.text}`
+      content: `\n\n--- Original message from ${mail.sender.name} (${mail.sender.email}) ---\n${mail.snippet}`
     }).toString()
     
     router.push(`/mail/compose?${query}`)
@@ -180,11 +138,18 @@ export function MailDisplay({ mail }: MailDisplayProps) {
     if (!mail) return
     const query = new URLSearchParams({
       subject: `Fwd: ${mail.subject}`,
-      content: `\n\n--- Forwarded message from ${mail.name} (${mail.email}) ---\n${mail.text}`
+      content: `\n\n--- Forwarded message from ${mail.sender.name} (${mail.sender.email}) ---\n${mail.snippet}`
     }).toString()
     
     router.push(`/mail/compose?${query}`)
   }
+
+  // Mark the email as read when viewed
+  React.useEffect(() => {
+    if (mail?.id && mail.unread) {
+      markEmailAsRead.mutate(mail.id);
+    }
+  }, [mail?.id, mail?.unread, markEmailAsRead]);
 
   return (
     <div className="flex h-full flex-col">
@@ -378,7 +343,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
               Mark as unread
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleStarThread}>
-              {mail?.labels.includes("important") ? "Remove star" : "Star thread"}
+              {mail?.labels?.includes("important") ? "Remove star" : "Star thread"}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => {
               if (!mail) return
@@ -407,19 +372,19 @@ export function MailDisplay({ mail }: MailDisplayProps) {
           <div className="flex items-start p-4">
             <div className="flex items-start gap-4 text-sm">
               <Avatar>
-                <AvatarImage alt={mail.name} />
+                <AvatarImage alt={mail.sender.name} />
                 <AvatarFallback>
-                  {mail.name
+                  {mail.sender.name
                     .split(" ")
                     .map((chunk) => chunk[0])
                     .join("")}
                 </AvatarFallback>
               </Avatar>
               <div className="grid gap-1">
-                <div className="font-semibold">{mail.name}</div>
+                <div className="font-semibold">{mail.sender.name}</div>
                 <div className="line-clamp-1 text-xs">{mail.subject}</div>
                 <div className="line-clamp-1 text-xs">
-                  <span className="font-medium">Reply-To:</span> {mail.email}
+                  <span className="font-medium">Reply-To:</span> {mail.sender.email}
                 </div>
               </div>
             </div>
@@ -431,7 +396,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
           </div>
           <Separator />
           <div className="flex-1 whitespace-pre-wrap p-4 text-sm">
-            {mail.text}
+            {mail.body || mail.snippet}
           </div>
           <Separator className="mt-auto" />
           <div className="p-4">
@@ -439,7 +404,7 @@ export function MailDisplay({ mail }: MailDisplayProps) {
               <div className="grid gap-4">
                 <Textarea
                   className="p-4"
-                  placeholder={`Reply ${mail.name}...`}
+                  placeholder={`Reply ${mail.sender.name}...`}
                 />
                 <div className="flex items-center">
                   <Label

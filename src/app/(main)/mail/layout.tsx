@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import React from "react";
-import { accounts, mails } from "../../../lib/data";
+import { accounts } from "../../../lib/data";
 import { Mail } from "./components/mail";
 
 interface LayoutProps {
@@ -57,7 +57,6 @@ const Layout: React.FC<LayoutProps> = async ({ children }) => {
     <div className="hidden flex-col md:flex h-screen">
       <Mail
         accounts={accounts}
-        mails={mails}
         defaultLayout={defaultLayout}
         defaultCollapsed={defaultCollapsed}
         navCollapsedSize={4}

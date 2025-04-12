@@ -13,8 +13,6 @@ import {
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Mail } from "@/lib/data";
-import { useMail } from "@/hooks/use-mail";
 import { ModeToggle } from "../../../../components/ui/mode-toggle";
 import { useAtom } from "jotai";
 import { userCategoriesAtom } from "@/lib/user-categories";
@@ -34,6 +32,8 @@ import { ResizablePanel } from "@/components/ui/resizable";
 import Link from "next/link";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import { AccountSwitcher } from "./account-switcher";
+import { EmailMessage } from "@/lib/types/nylas-types";
+import { useMail } from "@/hooks/use-mail";
 
 interface NavLinkItem {
   title: string;
@@ -46,13 +46,13 @@ interface NavLinkItem {
 }
 
 interface NavProps {
-  accounts: {
+  accounts?: {
     name: string;
     email: string;
     icon: React.ReactNode;
   }[];
-  mails: Mail[];
-  defaultLayout: number[] | undefined;
+  mails?: EmailMessage[];
+  defaultLayout?: number[];
   defaultCollapsed?: boolean;
   navCollapsedSize: number;
   onCollapsedChange?: (collapsed: boolean) => void;
@@ -60,7 +60,7 @@ interface NavProps {
 
 const Nav: React.FC<NavProps> = ({
   accounts,
-  mails,
+  mails = [],
   defaultLayout = [16, 32, 48],
   defaultCollapsed = false,
   navCollapsedSize,
@@ -246,11 +246,11 @@ const Nav: React.FC<NavProps> = ({
       <div className='px-2'>
         <AccountSwitcher 
           isCollapsed={isCollapsed} 
-          accounts={accounts.map(account => ({
+          accounts={accounts?.map(account => ({
             label: account.name,
             email: account.email,
             icon: account.icon,
-          }))} 
+          })) || []} 
         />
       </div>
       <div
