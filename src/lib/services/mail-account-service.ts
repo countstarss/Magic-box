@@ -139,24 +139,31 @@ class MailAccountService {
 
   // 获取当前账户的邮件
   public async getEmails(
-    limit: number = 20,
-    offset: number = 0
+    limit: number = 5,
+    offset: number = 0,
+    options?: { unread?: boolean }
   ): Promise<EmailMessage[]> {
     this.initialize();
 
     const currentAccount = this.getCurrentAccount();
     if (!currentAccount) {
+      console.log("No current account found");
       return [];
     }
 
     try {
+      console.log(
+        `Getting emails for account ${currentAccount.grantId} with options:`,
+        { limit, offset, ...options }
+      );
       return await nylasService.getEmails(currentAccount.grantId, {
         limit,
         offset,
+        ...(options || {}),
       });
     } catch (error) {
       console.error("Error getting emails for account:", error);
-      return [];
+      throw error;
     }
   }
 
@@ -166,10 +173,14 @@ class MailAccountService {
 
     const currentAccount = this.getCurrentAccount();
     if (!currentAccount) {
+      console.log("No current account found");
       return null;
     }
 
     try {
+      console.log(
+        `Getting email ${messageId} for account ${currentAccount.grantId}`
+      );
       return await nylasService.getEmail(currentAccount.grantId, messageId);
     } catch (error) {
       console.error("Error getting email details:", error);

@@ -48,11 +48,11 @@ export interface NylasAuthData {
 
 // Nylas API响应
 export interface NylasApiResponse<T> {
-  data?: T[];
-  requestId?: string;
-  metadata?: {
-    totalCount?: number;
-    limit?: number;
-    offset?: number;
+  data: T[];
+  request_id: string;
+  metadata: {
+    total_count: number;
+    limit: number;
+    offset: number;
   };
 }
