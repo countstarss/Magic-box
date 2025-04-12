@@ -13,7 +13,7 @@ interface User {
  */
 export async function checkAuth(): Promise<User | null> {
   // 获取cookie
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const authCookie = cookieStore.get("auth_token");
 
   // 模拟认证：在真实应用中，这里会验证令牌并返回用户信息
@@ -49,7 +49,8 @@ export async function login(
   // 简单验证 - 在真实应用中会连接到认证服务
   if (email && password) {
     // 设置认证cookie
-    cookies().set("auth_token", "mock-token", {
+    const cookieStore = await cookies();
+    cookieStore.set("auth_token", "mock-token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 24 * 7, // 一周
@@ -71,5 +72,6 @@ export async function login(
  */
 export async function logout(): Promise<void> {
   // 清除认证cookie
-  cookies().delete("auth_token");
+  const cookieStore = await cookies();
+  cookieStore.delete("auth_token");
 }

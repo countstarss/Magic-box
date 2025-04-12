@@ -21,7 +21,7 @@ export class EnhancedMailService {
   private readonly cacheRefreshInterval = 5;
 
   /**
-   * 获取邮件列表
+   * MARK: 获取邮件列表
    * @param options 查询选项
    */
   async getEmails(options: MailQueryOptions = {}): Promise<EmailMessage[]> {
@@ -111,7 +111,7 @@ export class EnhancedMailService {
   }
 
   /**
-   * 获取单封邮件详情
+   * MARK: 获取单封邮件详情
    * @param messageId 邮件ID
    * @param forceRefresh 是否强制刷新
    */
@@ -169,7 +169,7 @@ export class EnhancedMailService {
   }
 
   /**
-   * 标记邮件为已读
+   * MARK: 标记邮件为已读
    * @param messageId 邮件ID
    */
   async markAsRead(messageId: string): Promise<boolean> {
@@ -195,7 +195,7 @@ export class EnhancedMailService {
   }
 
   /**
-   * 标记邮件为未读
+   * MARK: 标记邮件为未读
    * @param messageId 邮件ID
    */
   async markAsUnread(messageId: string): Promise<boolean> {
@@ -221,7 +221,7 @@ export class EnhancedMailService {
   }
 
   /**
-   * 刷新邮件缓存
+   * MARK: 刷新邮件缓存
    */
   async refreshCache(options: MailQueryOptions = {}): Promise<boolean> {
     const currentAccount = mailAccountService.getCurrentAccount();
@@ -246,7 +246,7 @@ export class EnhancedMailService {
   }
 
   /**
-   * 清理过期缓存
+   * MARK: 清理过期缓存
    */
   async cleanupCache(): Promise<number> {
     try {
@@ -261,7 +261,7 @@ export class EnhancedMailService {
   // 以下是私有辅助方法
 
   /**
-   * 从缓存获取邮件
+   * MARK: 从缓存获取邮件
    */
   private async getEmailsFromCache(
     accountId: string,
@@ -271,7 +271,7 @@ export class EnhancedMailService {
   }
 
   /**
-   * 缓存邮件列表
+   * MARK: 缓存邮件列表
    */
   private async cacheEmails(
     emails: EmailMessage[],
@@ -282,7 +282,8 @@ export class EnhancedMailService {
   }
 
   /**
-   * 如果需要则刷新缓存（后台进行）
+   * MARK: 刷新缓存
+   * NOTE: 如果需要则刷新缓存（后台进行）
    */
   private async refreshCacheIfNeeded(
     accountId: string,
@@ -316,6 +317,6 @@ export class EnhancedMailService {
   }
 }
 
-// 创建单例
+//MARK: 创建单例
 const enhancedMailService = new EnhancedMailService();
 export default enhancedMailService;

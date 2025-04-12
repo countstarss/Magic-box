@@ -5,7 +5,7 @@ import {
 } from "../types/nylas-types";
 import nylasService from "./nylas-service";
 
-// 本地存储键
+//MARK: 本地存储键
 const NYLAS_ACCOUNTS_KEY = "nylas_accounts";
 const CURRENT_ACCOUNT_KEY = "current_nylas_account";
 
@@ -14,7 +14,7 @@ class MailAccountService {
   private currentAccountId: string | null = null;
   private isInitialized = false;
 
-  // 初始化，从本地存储加载账户信息
+  //MARK: 初始化，从本地存储加载账户信息
   private initialize(): void {
     if (this.isInitialized) return;
 
@@ -39,14 +39,14 @@ class MailAccountService {
     this.isInitialized = true;
   }
 
-  // 保存账户信息到本地存储
+  //MARK: 保存账户->本地
   private saveAccounts(): void {
     if (typeof window !== "undefined") {
       localStorage.setItem(NYLAS_ACCOUNTS_KEY, JSON.stringify(this.accounts));
     }
   }
 
-  // 保存当前账户ID到本地存储
+  //MARK: 当前账户ID->本地
   private saveCurrentAccountId(): void {
     if (typeof window !== "undefined" && this.currentAccountId) {
       localStorage.setItem(CURRENT_ACCOUNT_KEY, this.currentAccountId);
@@ -55,7 +55,7 @@ class MailAccountService {
     }
   }
 
-  // 添加新授权账户
+  //MARK: 添加新授权账户
   public addAccount(grantId: string, account: EmailAccount): void {
     this.initialize();
 
@@ -83,7 +83,7 @@ class MailAccountService {
     this.saveAccounts();
   }
 
-  // 移除授权账户
+  //MARK: 移除授权账户
   public removeAccount(grantId: string): void {
     this.initialize();
 
@@ -98,13 +98,13 @@ class MailAccountService {
     }
   }
 
-  // 获取所有授权账户
+  //MARK: 获取所有授权账户
   public getAccounts(): NylasAuthData[] {
     this.initialize();
     return [...this.accounts];
   }
 
-  // 获取当前账户
+  //MARK: 获取当前账户
   public getCurrentAccount(): NylasAuthData | null {
     this.initialize();
 
@@ -118,7 +118,7 @@ class MailAccountService {
     return account || null;
   }
 
-  // 设置当前账户
+  //MARK: 设置当前账户
   public setCurrentAccount(grantId: string): boolean {
     this.initialize();
 
@@ -131,13 +131,13 @@ class MailAccountService {
     return false;
   }
 
-  // 检查是否有授权账户
+  //MARK: 检查是否有授权账户
   public hasAccounts(): boolean {
     this.initialize();
     return this.accounts.length > 0;
   }
 
-  // 获取当前账户的邮件
+  //MARK: 获取当前账户的邮件
   public async getEmails(
     limit: number = 5,
     offset: number = 0,
@@ -167,7 +167,7 @@ class MailAccountService {
     }
   }
 
-  // 获取邮件详情
+  //MARK: 获取邮件详情
   public async getEmail(messageId: string): Promise<EmailMessage | null> {
     this.initialize();
 
@@ -189,6 +189,6 @@ class MailAccountService {
   }
 }
 
-// 创建单例
+//MARK: 创建单例
 const mailAccountService = new MailAccountService();
 export default mailAccountService;

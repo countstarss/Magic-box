@@ -21,7 +21,7 @@ const VIEW_SETTINGS = "viewSettings";
 const NOTIFICATION_STATES = "notificationStates";
 const DASHBOARD_WIDGETS = "dashboardWidgets";
 
-// 定义各个存储的索引名称
+//MARK: 定义索引名称
 interface StoreIndexMap {
   uiPreferences: {
     "by-user": "userId";
@@ -144,6 +144,7 @@ class IDBService {
     this.initDB();
   }
 
+  //MARK: 初始化数据库
   private initDB() {
     if (!this.dbPromise) {
       this.dbPromise = openDB<MailBoxDBSchema>(DB_NAME, 1, {
@@ -224,7 +225,7 @@ class IDBService {
     return this.dbPromise;
   }
 
-  // 用户界面偏好操作
+  //MARK: 用户界面偏好
   async getUserPreferences(userId: string): Promise<UIPreferences | undefined> {
     const db = await this.initDB();
     const tx = db.transaction(UI_PREFERENCES, "readonly");
@@ -232,6 +233,7 @@ class IDBService {
     return index.get(userId);
   }
 
+  //MARK: 保存用户界面偏好
   async saveUserPreferences(preferences: UIPreferences): Promise<number> {
     const db = await this.initDB();
     const tx = db.transaction(UI_PREFERENCES, "readwrite");
@@ -249,7 +251,7 @@ class IDBService {
     return tx.store.put(preferences);
   }
 
-  // 最近查看记录操作
+  //MARK: 添加最近查看记录
   async addRecentlyViewed(item: RecentlyViewed): Promise<void> {
     const db = await this.initDB();
     const tx = db.transaction(RECENTLY_VIEWED, "readwrite");
@@ -284,6 +286,7 @@ class IDBService {
     }
   }
 
+  //MARK: 获取最近查看记录
   async getRecentlyViewed(
     userId: string,
     itemType?: string,
@@ -318,7 +321,7 @@ class IDBService {
     return results;
   }
 
-  // 草稿操作
+  //MARK: 保存草稿
   async saveDraft(draft: DraftItem): Promise<number> {
     const db = await this.initDB();
     const tx = db.transaction(DRAFTS, "readwrite");
@@ -331,6 +334,7 @@ class IDBService {
     return tx.store.put(draft);
   }
 
+  //MARK: 获取草稿
   async getDrafts(userId: string, draftType?: string): Promise<DraftItem[]> {
     const db = await this.initDB();
     const tx = db.transaction(DRAFTS, "readonly");
@@ -355,16 +359,19 @@ class IDBService {
     }
   }
 
+  //MARK: 获取草稿
   async getDraftById(id: number): Promise<DraftItem | undefined> {
     const db = await this.initDB();
     return db.get(DRAFTS, id);
   }
 
+  //MARK: 删除草稿
   async deleteDraft(id: number): Promise<void> {
     const db = await this.initDB();
     await db.delete(DRAFTS, id);
   }
 
+  //MARK: 删除旧草稿
   async clearOldDrafts(userId: string, olderThanDays = 30): Promise<void> {
     const db = await this.initDB();
     const tx = db.transaction(DRAFTS, "readwrite");
@@ -381,7 +388,7 @@ class IDBService {
     }
   }
 
-  // 搜索历史操作
+  //MARK: 添加搜索历史
   async addSearchHistory(search: SearchHistory): Promise<number> {
     const db = await this.initDB();
     const tx = db.transaction(SEARCH_HISTORY, "readwrite");
@@ -401,6 +408,7 @@ class IDBService {
     return tx.store.add(search);
   }
 
+  //MARK: 获取搜索历史
   async getSearchHistory(
     userId: string,
     searchArea?: string,
@@ -430,6 +438,7 @@ class IDBService {
     return results.sort((a, b) => b.timestamp - a.timestamp).slice(0, limit);
   }
 
+  //MARK: 清除搜索历史
   async clearSearchHistory(userId: string): Promise<void> {
     const db = await this.initDB();
     const tx = db.transaction(SEARCH_HISTORY, "readwrite");
@@ -442,7 +451,7 @@ class IDBService {
     }
   }
 
-  // 视图设置操作
+  //MARK: 保存视图设置
   async saveViewSettings(settings: ViewSettings): Promise<number> {
     const db = await this.initDB();
     const tx = db.transaction(VIEW_SETTINGS, "readwrite");
@@ -464,6 +473,7 @@ class IDBService {
     return tx.store.put(settings);
   }
 
+  //MARK: 获取视图设置
   async getViewSettings(
     userId: string,
     viewType: ViewType
@@ -483,7 +493,7 @@ class IDBService {
     return undefined;
   }
 
-  // 通知状态操作
+  //MARK: 更新通知状态
   async updateNotificationState(state: NotificationState): Promise<number> {
     const db = await this.initDB();
     const tx = db.transaction(NOTIFICATION_STATES, "readwrite");
@@ -500,6 +510,7 @@ class IDBService {
     return tx.store.put(state);
   }
 
+  //MARK: 获取通知状态
   async getNotificationState(
     notificationId: string
   ): Promise<NotificationState | undefined> {
@@ -509,6 +520,7 @@ class IDBService {
     return notifIdx.get(notificationId);
   }
 
+  //MARK: 获取未读通知数量
   async getUnreadNotificationCount(userId: string): Promise<number> {
     const db = await this.initDB();
     const tx = db.transaction(NOTIFICATION_STATES, "readonly");
@@ -526,6 +538,7 @@ class IDBService {
     return count;
   }
 
+  //MARK: 标记所有通知已读
   async markAllNotificationsAsRead(userId: string): Promise<void> {
     const db = await this.initDB();
     const tx = db.transaction(NOTIFICATION_STATES, "readwrite");
@@ -543,7 +556,7 @@ class IDBService {
     }
   }
 
-  // 仪表盘小组件配置操作
+  //MARK: 保存仪表盘配置
   async saveDashboardConfig(config: DashboardWidgetConfig): Promise<number> {
     const db = await this.initDB();
     const tx = db.transaction(DASHBOARD_WIDGETS, "readwrite");
@@ -560,6 +573,7 @@ class IDBService {
     return tx.store.put(config);
   }
 
+  //MARK: 获取仪表盘小组件配置
   async getDashboardConfig(
     userId: string
   ): Promise<DashboardWidgetConfig | undefined> {
@@ -570,6 +584,6 @@ class IDBService {
   }
 }
 
-// 创建单例实例
+//MARK: 创建单例实例
 const idbService = new IDBService();
 export default idbService;

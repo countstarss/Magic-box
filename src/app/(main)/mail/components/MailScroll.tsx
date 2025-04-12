@@ -58,7 +58,7 @@ const MailScroll: React.FC<MailListProps> = ({
   
   // 使用React Query缓存获取邮件列表 - 使用memo避免重复创建配置对象
   const emailQueryOptions = React.useMemo(() => ({ 
-    limit: 50, 
+    limit: 10, 
     unread: false 
   }), []);
   
