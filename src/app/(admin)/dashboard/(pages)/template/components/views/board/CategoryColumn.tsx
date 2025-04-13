@@ -1,11 +1,11 @@
 "use client";
 
-import { Template } from '../template-data';
+import { Template } from '../../template-data';
 import { Badge } from '@/components/ui/badge';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableTemplateItem } from './SortableTemplateItem';
 import { useDroppable } from '@dnd-kit/core';
-import { Plus } from 'lucide-react';
+import { GripHorizontal, GripVertical, Plus } from 'lucide-react';
 
 // 类别列组件的props类型定义
 export interface CategoryColumnProps {
@@ -41,11 +41,16 @@ export function CategoryColumn({
   return (
     <div 
       ref={setNodeRef}
-      className={`bg-muted/30 rounded-lg p-4 min-w-[300px] h-full flex flex-col transition-colors
+      className={`bg-muted/30 rounded-lg p-4 min-w-[300px] h-[calc(100vh-260px)] flex flex-col transition-colors select-none overflow-y-auto
         ${isOver ? 'bg-muted/60 ring-2 ring-primary/50' : ''}`}
     >
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-medium">{category}</h3>
+        <div 
+            className="cursor-grab opacity-30 hover:opacity-100 touch-none"
+          >
+            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+          </div>
         <Badge variant="outline">{templates.length}</Badge>
       </div>
       

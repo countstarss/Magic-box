@@ -3,9 +3,9 @@
 import { useCallback, useState, useEffect } from 'react';
 import { Template } from '../template-data';
 import { DndContext, DragOverlay, closestCorners, UniqueIdentifier } from '@dnd-kit/core';
-import { CategoryColumn } from './CategoryColumn';
-import { useBoardGroups } from './useBoardGroups';
-import { useBoardDragAndDrop } from './useBoardDragAndDrop';
+import { CategoryColumn } from './board/CategoryColumn';
+import { useBoardGroups } from './board/useBoardGroups';
+import { useBoardDragAndDrop } from './board/useBoardDragAndDrop';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';

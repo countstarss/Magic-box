@@ -1,6 +1,6 @@
 "use client";
 
-import { Template, formatDate } from '../template-data';
+import { Template, formatDate } from '../../template-data';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 

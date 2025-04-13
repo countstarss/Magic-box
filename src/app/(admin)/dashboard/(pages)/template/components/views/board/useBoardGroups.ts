@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Template } from "../template-data";
+import { Template } from "../../template-data";
 
 /**
  * 自定义Hook，处理看板分组逻辑
@@ -27,6 +27,7 @@ export function useBoardGroups(templates: Template[]) {
   }, [templates]);
 
   /**
+  // MARK: 移动类别
    * 将模板从一个类别移动到另一个类别
    */
   const moveTemplate = useCallback(
@@ -69,6 +70,7 @@ export function useBoardGroups(templates: Template[]) {
   );
 
   /**
+   * MARK: 重新排序模板
    * 重新排序模板
    */
   const reorderTemplate = useCallback(

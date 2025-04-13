@@ -389,7 +389,7 @@ export default function TemplateClient() {
   const router = useRouter();
   
   return (
-    <div className="py-6 w-full px-8 overflow-y-auto h-full pb-24">
+    <div className="py-6 w-full px-8 overflow-y-auto h-[calc(100vh-60px)] pb-24">
       {/* 页面标题和操作栏 */}
       <div className="flex justify-between items-center mb-6">
         <div>

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { Template } from "../template-data";
+import { Template } from "../../template-data";
 import {
   DragStartEvent,
   DragEndEvent,
