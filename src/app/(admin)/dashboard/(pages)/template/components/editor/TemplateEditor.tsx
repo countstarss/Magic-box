@@ -70,6 +70,20 @@ export default function TemplateEditor({
   // Hooks
   const { toast } = useToast();
 
+  // 当编辑器准备好且是新建模板时，自动显示信息对话框
+  useEffect(() => {
+    // 如果是新建模板（无ID）且编辑器已准备好，自动显示模板信息对话框
+    if (isEditorReady && !template?.id && 
+        (importType === 'blank' || importType === 'html')) {
+      // 延迟一点显示对话框，确保编辑器加载完成
+      const timer = setTimeout(() => {
+        setIsInfoDialogOpen(true);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isEditorReady, template, importType]);
+
   // 编辑器准备好的回调
   const onEditorReady = () => {
     setIsEditorReady(true);

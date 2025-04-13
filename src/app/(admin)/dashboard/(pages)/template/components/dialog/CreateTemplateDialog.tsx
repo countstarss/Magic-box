@@ -36,7 +36,6 @@ interface CreateTemplateDialogProps {
 export function CreateTemplateDialog({ isOpen, onOpenChange }: CreateTemplateDialogProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const { createTemplate } = useTemplates();
   
   // 状态
   const [selectedOption, setSelectedOption] = useState<'blank' | 'template' | 'html'>('blank');
@@ -49,7 +48,7 @@ export function CreateTemplateDialog({ isOpen, onOpenChange }: CreateTemplateDia
     setSelectedOption(option);
     
     if (option === 'blank') {
-      // 直接跳转到编辑页面
+      // 直接跳转到编辑页面，模板信息将在那里填写
       onOpenChange(false);
       router.push('/dashboard/template/edit?type=blank');
     } else {
