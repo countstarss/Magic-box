@@ -7,6 +7,7 @@ export interface Template {
   thumbnail: string;
   isFeatured: boolean;
   isStarred: boolean;
+  isPublic: boolean;
   lastModified: string;
   htmlContent?: string; // 可选属性，用于存储模板的HTML内容
 }
@@ -35,6 +36,7 @@ export const templates: Template[] = [
     thumbnail: "/templates/newsletter-minimal.jpg",
     isFeatured: true,
     isStarred: true,
+    isPublic: true,
     lastModified: "2023-09-15T10:30:00Z",
   },
   {
@@ -45,6 +47,7 @@ export const templates: Template[] = [
     thumbnail: "/templates/product-launch.jpg",
     isFeatured: true,
     isStarred: false,
+    isPublic: false,
     lastModified: "2023-08-22T14:45:00Z",
   },
   {
@@ -55,6 +58,7 @@ export const templates: Template[] = [
     thumbnail: "/templates/promotion.jpg",
     isFeatured: false,
     isStarred: true,
+    isPublic: true,
     lastModified: "2023-07-10T08:15:00Z",
   },
   {
@@ -65,6 +69,7 @@ export const templates: Template[] = [
     thumbnail: "/templates/welcome.jpg",
     isFeatured: false,
     isStarred: false,
+    isPublic: true,
     lastModified: "2023-06-05T16:20:00Z",
   },
   {
@@ -75,6 +80,7 @@ export const templates: Template[] = [
     thumbnail: "/templates/content-creator.jpg",
     isFeatured: true,
     isStarred: false,
+    isPublic: true,
     lastModified: "2023-09-01T11:00:00Z",
   },
   {
@@ -85,6 +91,7 @@ export const templates: Template[] = [
     thumbnail: "/templates/data-report.jpg",
     isFeatured: false,
     isStarred: false,
+    isPublic: true,
     lastModified: "2023-08-15T09:45:00Z",
   },
   {
@@ -95,6 +102,7 @@ export const templates: Template[] = [
     thumbnail: "/templates/event-invitation.jpg",
     isFeatured: true,
     isStarred: true,
+    isPublic: true,
     lastModified: "2023-08-30T15:30:00Z",
   },
   {
@@ -105,6 +113,7 @@ export const templates: Template[] = [
     thumbnail: "/templates/survey.jpg",
     isFeatured: false,
     isStarred: false,
+    isPublic: true,
     lastModified: "2023-07-25T13:10:00Z",
   },
 ];

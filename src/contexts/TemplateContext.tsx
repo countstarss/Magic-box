@@ -10,6 +10,7 @@ export interface TemplateFilters {
   search?: string;
   featured?: boolean;
   starred?: boolean;
+  public?: boolean;
   tags?: string[];
 }
 
@@ -34,6 +35,7 @@ interface TemplateContextType {
   deleteTemplate: (id: number) => Promise<void>;
   toggleStar: (id: number) => Promise<void>;
   toggleFeatured: (id: number) => Promise<void>;
+  togglePublic: (id: number) => Promise<void>;
   createCategory: (name: string, description?: string) => Promise<number>;
   updateCategory: (id: number, name: string, description?: string) => Promise<void>;
   deleteCategory: (id: number) => Promise<void>;
@@ -66,6 +68,7 @@ export function TemplateProvider({ children, userId }: TemplateProviderProps) {
       category: filters.category,
       featured: filters.featured,
       starred: filters.starred,
+      public: filters.public,
       search: filters.search,
       tags: filters.tags
     }),
@@ -185,6 +188,23 @@ export function TemplateProvider({ children, userId }: TemplateProviderProps) {
     }
   };
 
+  // 切换公开状态
+  const togglePublic = async (id: number) => {
+    try {
+      await templateDb.togglePublic(id);
+      // 如果当前选中的模板是被操作的模板，更新状态
+      if (selectedTemplate && selectedTemplate.id === id) {
+        const updatedTemplate = await templateDb.getTemplate(id);
+        if (updatedTemplate) {
+          setSelectedTemplate(updatedTemplate);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    }
+  };
+
   // 创建分类
   const createCategory = async (name: string, description?: string) => {
     try {
@@ -238,6 +258,7 @@ export function TemplateProvider({ children, userId }: TemplateProviderProps) {
     deleteTemplate,
     toggleStar,
     toggleFeatured,
+    togglePublic,
     createCategory,
     updateCategory,
     deleteCategory,

@@ -11,6 +11,7 @@ export interface EmailTemplate {
   design: any; // 存储unlayer编辑器的设计JSON
   isFeatured: boolean;
   isStarred: boolean;
+  isPublic: boolean; // 新增：标记模板是否公开
   createdAt: Date;
   updatedAt: Date;
   tags: string[]; // 标签数组，用于增强搜索和分类
@@ -37,10 +38,22 @@ export class TemplateDatabase extends Dexie {
     super("TemplateDatabase");
 
     // 定义数据库架构
-    this.version(1).stores({
+    this.version(2).stores({
       templates:
-        "++id, name, category, isFeatured, isStarred, createdAt, updatedAt, userId, *tags",
+        "++id, name, category, isFeatured, isStarred, isPublic, createdAt, updatedAt, userId, *tags",
       categories: "++id, name, userId",
+    });
+
+    // 迁移逻辑 - 为已有模板添加isPublic字段
+    this.version(2).upgrade((tx) => {
+      return tx
+        .table("templates")
+        .toCollection()
+        .modify((template) => {
+          if (template.isPublic === undefined) {
+            template.isPublic = false;
+          }
+        });
     });
   }
 
@@ -51,6 +64,7 @@ export class TemplateDatabase extends Dexie {
       category?: string;
       featured?: boolean;
       starred?: boolean;
+      public?: boolean;
       search?: string;
       tags?: string[];
       limit?: number;
@@ -80,6 +94,11 @@ export class TemplateDatabase extends Dexie {
     // 按收藏筛选
     if (options.starred !== undefined) {
       templates = templates.filter((t) => t.isStarred === options.starred);
+    }
+
+    // 按公开状态筛选
+    if (options.public !== undefined) {
+      templates = templates.filter((t) => t.isPublic === options.public);
     }
 
     // 按标签筛选
@@ -163,6 +182,19 @@ export class TemplateDatabase extends Dexie {
       template.updatedAt = new Date();
       await this.templates.update(id, {
         isFeatured: template.isFeatured,
+        updatedAt: template.updatedAt,
+      });
+    }
+  }
+
+  // 切换公开状态
+  async togglePublic(id: number): Promise<void> {
+    const template = await this.getTemplate(id);
+    if (template) {
+      template.isPublic = !template.isPublic;
+      template.updatedAt = new Date();
+      await this.templates.update(id, {
+        isPublic: template.isPublic,
         updatedAt: template.updatedAt,
       });
     }

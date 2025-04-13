@@ -176,6 +176,7 @@ export default function TemplateEditor({
         design: designData,
         isFeatured: template?.isFeatured || false,
         isStarred: template?.isStarred || false,
+        isPublic: template?.isPublic || false,
         tags: templateInfo.tags,
         userId: template?.userId || "current-user-id", // 在实际应用中，应从认证系统获取
       };

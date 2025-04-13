@@ -11,13 +11,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { 
-  Star, MoreHorizontal, Copy, Pencil, Trash2, StarOff 
+  Star, MoreHorizontal, Copy, Pencil, Trash2, StarOff, Tag 
 } from 'lucide-react';
 
 interface ListViewProps {
   templates: Template[];
   onOpenPreview: (template: Template) => void;
   onToggleStar: (template: Template) => void;
+  onTogglePublic: (template: Template) => void;
   onDuplicateTemplate: (template: Template) => void;
   onDeleteTemplate: (template: Template) => void;
   onUpdateCategory?: (category: string, templateId: number) => void;
@@ -27,6 +28,7 @@ export function ListView({
   templates,
   onOpenPreview,
   onToggleStar,
+  onTogglePublic,
   onDuplicateTemplate,
   onDeleteTemplate,
   onUpdateCategory
@@ -61,6 +63,7 @@ export function ListView({
                 </Button>
               )}
               {template.isFeatured && <Badge className="h-6">精选</Badge>}
+              {template.isPublic && <Badge variant="secondary" className="h-6">公开</Badge>}
             </div>
           </div>
           <div className="col-span-4 md:col-span-3 text-muted-foreground text-sm">
@@ -97,6 +100,17 @@ export function ListView({
                   ) : (
                     <>
                       <Star className="mr-2 h-4 w-4" /> 收藏
+                    </>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onTogglePublic(template)}>
+                  {template.isPublic ? (
+                    <>
+                      <Tag className="mr-2 h-4 w-4" /> 设为私有
+                    </>
+                  ) : (
+                    <>
+                      <Tag className="mr-2 h-4 w-4" /> 发布为公开
                     </>
                   )}
                 </DropdownMenuItem>

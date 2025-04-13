@@ -1,64 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { ArrowLeft, Search, Bookmark, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Search } from "lucide-react";
 import Image from "next/image";
-
-// 预置模板数据
-const templateLibrary = [
-  {
-    id: "tpl-1",
-    name: "极简周报通讯",
-    description: "简洁现代的周报模板，适合发送内容摘要和重要更新",
-    category: "通讯",
-    thumbnail: "/templates/newsletter-minimal.jpg",
-    design: { /* 设计数据 */ },
-  },
-  {
-    id: "tpl-2",
-    name: "产品发布公告",
-    description: "突出展示新产品特性和优势的专业模板",
-    category: "产品发布",
-    thumbnail: "/templates/product-launch.jpg",
-    design: { /* 设计数据 */ },
-  },
-  {
-    id: "tpl-3",
-    name: "限时促销活动",
-    description: "醒目的促销模板，带有倒计时和清晰的号召性按钮",
-    category: "促销活动",
-    thumbnail: "/templates/promotion.jpg",
-    design: { /* 设计数据 */ },
-  },
-  {
-    id: "tpl-4",
-    name: "欢迎新订阅者",
-    description: "温馨友好的欢迎邮件，介绍您的品牌和预期内容",
-    category: "欢迎邮件",
-    thumbnail: "/templates/welcome.jpg",
-    design: { /* 设计数据 */ },
-  },
-  {
-    id: "tpl-5",
-    name: "内容创作者简报",
-    description: "专为博主和内容创作者设计的个性化通讯模板",
-    category: "个人博客",
-    thumbnail: "/templates/content-creator.jpg",
-    design: { /* 设计数据 */ },
-  },
-  {
-    id: "tpl-6",
-    name: "数据驱动报告",
-    description: "清晰展示统计数据和图表的专业报告模板",
-    category: "通讯",
-    thumbnail: "/templates/data-report.jpg",
-    design: { /* 设计数据 */ },
-  },
-];
+import { useTemplates } from "@/contexts/TemplateContext";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import { usePublicTemplates } from "../hooks/usePublicTemplates";
 
 // 占位图像
 const placeholderImage =
@@ -66,33 +19,66 @@ const placeholderImage =
 
 export default function TemplateLibraryPage() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
+  const { createTemplate } = useTemplates();
   
-  // 过滤模板
-  const filteredTemplates = templateLibrary.filter(template => 
-    template.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    template.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // 使用公开模板Hook
+  const {
+    publicTemplates,
+    searchQuery,
+    setSearchQuery,
+    clearSearch,
+    isLoading,
+    error
+  } = usePublicTemplates();
   
-  // 处理选择模板
-  const handleSelectTemplate = (templateId: string) => {
-    // 在实际实现中，这里应该获取模板数据并存储到会话中
-    const selectedTemplate = templateLibrary.find(t => t.id === templateId);
-    
-    if (selectedTemplate) {
-      // 存储设计数据
-      sessionStorage.setItem("selectedTemplateDesign", JSON.stringify(selectedTemplate.design));
+  // 处理使用模板（创建副本）
+  const handleUseTemplate = useCallback(async (templateId: number) => {
+    try {
+      // 查找选定的模板
+      const selectedTemplate = publicTemplates.find(t => t.id === templateId);
       
-      // 导航到编辑页面
-      router.push(`/dashboard/template/edit?type=template`);
+      if (selectedTemplate) {
+        // 创建模板副本
+        const newTemplate = {
+          name: `${selectedTemplate.name} (副本)`,
+          description: selectedTemplate.description,
+          category: selectedTemplate.category,
+          thumbnail: selectedTemplate.thumbnail,
+          htmlContent: selectedTemplate.htmlContent,
+          design: selectedTemplate.design,
+          isFeatured: false,
+          isStarred: false,
+          isPublic: false, // 副本默认为私有
+          tags: selectedTemplate.tags || [],
+          userId: selectedTemplate.userId,
+        };
+        
+        // 保存到数据库
+        await createTemplate(newTemplate);
+        
+        toast({
+          title: "模板已添加到您的账户",
+          description: `已创建"${newTemplate.name}"`,
+        });
+        
+        // 导航到我的模板页面
+        router.push("/dashboard/template");
+      }
+    } catch (error) {
+      console.error("使用模板失败:", error);
+      toast({
+        title: "操作失败",
+        description: error instanceof Error ? error.message : "无法使用此模板",
+        variant: "destructive"
+      });
     }
-  };
+  }, [publicTemplates, createTemplate, toast, router]);
   
   // 返回上一页
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     router.push("/dashboard/template");
-  };
+  }, [router]);
   
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -103,7 +89,7 @@ export default function TemplateLibraryPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             返回
           </Button>
-          <h1 className="text-2xl font-bold">模板库</h1>
+          <h1 className="text-2xl font-bold">公开模板库</h1>
         </div>
         
         {/* 搜索框 */}
@@ -118,55 +104,130 @@ export default function TemplateLibraryPage() {
         </div>
       </div>
       
-      {/* 模板网格 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTemplates.map((template) => (
-          <Card key={template.id} className="overflow-hidden flex flex-col">
-            <div className="relative aspect-[16/9] overflow-hidden">
-              <Image
-                src={template.thumbnail}
-                alt={template.name}
-                fill
-                className="object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = placeholderImage;
-                }}
-              />
-            </div>
-            <CardContent className="p-4 flex-1">
-              <div className="flex justify-between items-start">
-                <h3 className="font-semibold text-lg">{template.name}</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">{template.description}</p>
-              <div className="mt-2">
-                <span className="text-xs bg-muted px-2 py-1 rounded-md">
-                  {template.category}
-                </span>
-              </div>
-            </CardContent>
-            <CardFooter className="p-4 pt-0">
-              <Button 
-                onClick={() => handleSelectTemplate(template.id)}
-                className="w-full"
-              >
-                使用此模板
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+      {/* 加载状态 */}
+      {isLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="overflow-hidden flex flex-col">
+              <Skeleton className="aspect-[16/9] w-full" />
+              <CardContent className="p-4 flex-1">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-full mb-1" />
+                <Skeleton className="h-4 w-2/3" />
+              </CardContent>
+              <CardFooter className="p-4 pt-0">
+                <Skeleton className="h-10 w-full" />
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
       
-      {/* 空状态 */}
-      {filteredTemplates.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-lg text-muted-foreground">没有找到匹配的模板</p>
+      {/* 错误状态 */}
+      {!isLoading && error && (
+        <div className="bg-destructive/10 text-destructive p-4 rounded-md">
+          <h3 className="font-medium">加载失败</h3>
+          <p>{error.message}</p>
           <Button 
             variant="outline" 
-            className="mt-4"
-            onClick={() => setSearchQuery("")}
+            className="mt-2"
+            onClick={() => window.location.reload()}
           >
-            清除搜索
+            重试
           </Button>
+        </div>
+      )}
+      
+      {/* 模板网格 */}
+      {!isLoading && !error && publicTemplates.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {publicTemplates.map((template) => (
+            <Card key={template.id} className="overflow-hidden flex flex-col">
+              <div className="relative aspect-[16/9] overflow-hidden">
+                {template.htmlContent ? (
+                  <iframe
+                    srcDoc={`
+                      <!DOCTYPE html>
+                      <html>
+                      <head>
+                        <meta charset="utf-8">
+                        <style>
+                          body {
+                            margin: 0;
+                            transform: scale(0.35);
+                            transform-origin: 0 0;
+                            width: 285%;
+                            height: 285%;
+                          }
+                        </style>
+                      </head>
+                      <body>${template.htmlContent}</body>
+                      </html>
+                    `}
+                    className="w-full h-full border-0"
+                    title={template.name}
+                    sandbox="allow-same-origin"
+                  />
+                ) : (
+                  <Image
+                    src={template.thumbnail || placeholderImage}
+                    alt={template.name}
+                    fill
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = placeholderImage;
+                    }}
+                  />
+                )}
+                
+                {/* 特殊状态标签 */}
+                <div className="absolute top-2 left-2 flex gap-1">
+                  {template.isFeatured && (
+                    <Badge>精选</Badge>
+                  )}
+                </div>
+              </div>
+              <CardContent className="p-4 flex-1">
+                <div className="flex justify-between items-start">
+                  <h3 className="font-semibold text-lg">{template.name}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{template.description}</p>
+                <div className="mt-2 flex justify-between items-center">
+                  <Badge variant="outline" className="font-normal">
+                    {template.category}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(template.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </CardContent>
+              <CardFooter className="p-4 pt-0">
+                <Button 
+                  onClick={() => handleUseTemplate(template.id as number)}
+                  className="w-full"
+                >
+                  使用此模板
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
+      
+      {/* 空状态 */}
+      {!isLoading && !error && publicTemplates.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-lg text-muted-foreground">没有找到匹配的公开模板</p>
+          {searchQuery && (
+            <Button 
+              variant="outline" 
+              className="mt-4"
+              onClick={clearSearch}
+            >
+              清除搜索
+            </Button>
+          )}
         </div>
       )}
     </div>

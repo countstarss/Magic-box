@@ -5,7 +5,8 @@ import { PreviewDialog } from './dialog/PreviewDialog';
 import { CreateTemplateDialog } from './dialog/CreateTemplateDialog';
 import { CreateCategoryDialog } from './dialog/CreateCategoryDialog';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Loader2 } from 'lucide-react';
+import { PlusCircle, Loader2, Star } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 // 导入视图组件
 import { CardView } from './views/CardView';
@@ -35,6 +36,7 @@ export default function TemplateClient() {
     filters,
     toggleStar,
     toggleFeatured,
+    togglePublic,
     createCategory,
     selectTemplate,
     selectedTemplate,
@@ -70,7 +72,8 @@ export default function TemplateClient() {
     categories: [] as string[],
     dateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined },
     showFeatured: false,
-    showStarred: false
+    showStarred: false,
+    showPublic: false
   });
   
   // 当搜索查询改变时，更新筛选器
@@ -189,6 +192,7 @@ export default function TemplateClient() {
           design: templateToDuplicate.design,
           isFeatured: false, // 副本不继承精选状态
           isStarred: false, // 副本不继承收藏状态
+          isPublic: false, // 副本不继承公开状态
           tags: templateToDuplicate.tags || [],
           userId: templateToDuplicate.userId,
         };
@@ -308,12 +312,13 @@ export default function TemplateClient() {
       categories: [],
       dateRange: { from: undefined, to: undefined },
       showFeatured: false,
-      showStarred: false
+      showStarred: false,
+      showPublic: false
     });
     // 避免重复重置
     if (filters.featured !== undefined || filters.starred !== undefined || 
-        filters.tags !== undefined || filters.search !== undefined || 
-        filters.category !== undefined) {
+        filters.public !== undefined || filters.tags !== undefined || 
+        filters.search !== undefined || filters.category !== undefined) {
       resetFilters();
     }
   };
@@ -339,7 +344,7 @@ export default function TemplateClient() {
     // 暂时不实现
   };
   
-  const toggleFeatureFilter = (feature: 'showFeatured' | 'showStarred') => {
+  const toggleFeatureFilter = (feature: 'showFeatured' | 'showStarred' | 'showPublic') => {
     const newValue = !advancedFilters[feature];
     setAdvancedFilters({
       ...advancedFilters,
@@ -351,6 +356,8 @@ export default function TemplateClient() {
       setFilters({ featured: newValue || undefined });
     } else if (feature === 'showStarred' && filters.starred !== (newValue || undefined)) {
       setFilters({ starred: newValue || undefined });
+    } else if (feature === 'showPublic' && filters.public !== (newValue || undefined)) {
+      setFilters({ public: newValue || undefined });
     }
   };
   
@@ -361,6 +368,26 @@ export default function TemplateClient() {
     }
   };
   
+  // 切换公开状态
+  const handleTogglePublic = async (templateId: number) => {
+    try {
+      await togglePublic(templateId);
+      toast({
+        title: "模板状态已更新",
+        description: "模板公开状态已改变",
+      });
+    } catch (error) {
+      console.error("切换公开状态失败:", error);
+      toast({
+        title: "操作失败",
+        description: error instanceof Error ? error.message : "更新模板状态时出错",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const router = useRouter();
+  
   return (
     <div className="py-6 w-full px-8 overflow-y-auto h-full pb-24">
       {/* 页面标题和操作栏 */}
@@ -370,6 +397,10 @@ export default function TemplateClient() {
           <p className="text-muted-foreground">管理您的邮件模板</p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={() => router.push('/dashboard/template/library')} variant="outline" className="gap-2">
+            <Star size={16} />
+            公开模板库
+          </Button>
           <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
             <PlusCircle size={16} />
             新建模板
@@ -453,12 +484,14 @@ export default function TemplateClient() {
                 thumbnail: t.thumbnail,
                 isFeatured: t.isFeatured,
                 isStarred: t.isStarred,
+                isPublic: t.isPublic,
                 lastModified: t.updatedAt.toISOString(),
                 htmlContent: t.htmlContent
               }))}
               templateCategories={categories.map(c => c.name)}
               onOpenPreview={(template) => handleOpenPreview(template.id)}
               onToggleStar={(template) => handleToggleStar(template.id)}
+              onTogglePublic={(template) => handleTogglePublic(template.id)}
               onUpdateCategory={(category, templateId) => handleUpdateCategory(templateId, category)}
               onPrepareNewCategory={(template) => handlePrepareNewCategory(template.id)}
               onDuplicateTemplate={(template) => handleDuplicateTemplate(template.id)}
@@ -476,11 +509,13 @@ export default function TemplateClient() {
                 thumbnail: t.thumbnail,
                 isFeatured: t.isFeatured,
                 isStarred: t.isStarred,
+                isPublic: t.isPublic,
                 lastModified: t.updatedAt.toISOString(),
                 htmlContent: t.htmlContent
               }))}
               onOpenPreview={(template) => handleOpenPreview(template.id)}
               onToggleStar={(template) => handleToggleStar(template.id)}
+              onTogglePublic={(template) => handleTogglePublic(template.id)}
               onDuplicateTemplate={(template) => handleDuplicateTemplate(template.id)}
               onDeleteTemplate={(template) => handleDeleteTemplate(template.id)}
               onUpdateCategory={(category, templateId) => handleUpdateCategory(templateId, category)}
@@ -497,11 +532,13 @@ export default function TemplateClient() {
                 thumbnail: t.thumbnail,
                 isFeatured: t.isFeatured,
                 isStarred: t.isStarred,
+                isPublic: t.isPublic,
                 lastModified: t.updatedAt.toISOString(),
                 htmlContent: t.htmlContent
               }))}
               onOpenPreview={(template) => handleOpenPreview(template.id)}
               onToggleStar={(template) => handleToggleStar(template.id)}
+              onTogglePublic={(template) => handleTogglePublic(template.id)}
               onDuplicateTemplate={(template) => handleDuplicateTemplate(template.id)}
               onDeleteTemplate={(template) => handleDeleteTemplate(template.id)}
             />
@@ -521,6 +558,7 @@ export default function TemplateClient() {
           thumbnail: selectedTemplate.thumbnail,
           isFeatured: selectedTemplate.isFeatured,
           isStarred: selectedTemplate.isStarred,
+          isPublic: selectedTemplate.isPublic,
           lastModified: selectedTemplate.updatedAt.toISOString()
         } : null} 
       />

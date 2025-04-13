@@ -32,6 +32,7 @@ interface CardViewProps {
   templateCategories: string[];
   onOpenPreview: (template: Template) => void;
   onToggleStar: (template: Template) => void;
+  onTogglePublic: (template: Template) => void;
   onUpdateCategory: (category: string, templateId: number) => void;
   onPrepareNewCategory: (template: Template) => void;
   onDuplicateTemplate: (template: Template) => void;
@@ -43,6 +44,7 @@ export function CardView({
   templateCategories,
   onOpenPreview,
   onToggleStar,
+  onTogglePublic,
   onUpdateCategory,
   onPrepareNewCategory,
   onDuplicateTemplate,
@@ -105,12 +107,22 @@ export function CardView({
               )}
             </Button>
             
-            {/* 精选标签 */}
-            {template.isFeatured && (
-              <Badge className="absolute top-2 left-2">
-                精选
-              </Badge>
-            )}
+            {/* 标签容器 */}
+            <div className="absolute top-2 left-2 flex gap-1">
+              {/* 精选标签 */}
+              {template.isFeatured && (
+                <Badge>
+                  精选
+                </Badge>
+              )}
+              
+              {/* 公开标签 */}
+              {template.isPublic && (
+                <Badge variant="secondary">
+                  公开
+                </Badge>
+              )}
+            </div>
           </div>
           
           <CardHeader className="pb-2">
@@ -133,6 +145,17 @@ export function CardView({
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onDuplicateTemplate(template)}>
                     <Copy className="mr-2 h-4 w-4" /> 复制
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onTogglePublic(template)}>
+                    {template.isPublic ? (
+                      <>
+                        <Tag className="mr-2 h-4 w-4" /> 设为私有
+                      </>
+                    ) : (
+                      <>
+                        <Tag className="mr-2 h-4 w-4" /> 发布为公开
+                      </>
+                    )}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuSub>

@@ -19,6 +19,7 @@ interface BoardViewProps {
   templates: Template[];
   onOpenPreview: (template: Template) => void;
   onToggleStar: (template: Template) => void;
+  onTogglePublic: (template: Template) => void;
   onDuplicateTemplate: (template: Template) => void;
   onDeleteTemplate: (template: Template) => void;
 }
@@ -27,6 +28,7 @@ export function BoardView({
   templates,
   onOpenPreview,
   onToggleStar,
+  onTogglePublic,
   onDuplicateTemplate,
   onDeleteTemplate
 }: BoardViewProps) {
@@ -111,6 +113,15 @@ export function BoardView({
                           <Star className="mr-2 h-4 w-4" /> 
                           {template.isStarred ? "取消收藏" : "收藏"}
                         </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onTogglePublic(template);
+                          }}
+                        >
+                          <Tag className="mr-2 h-4 w-4" /> 
+                          {template.isPublic ? "设为私有" : "发布为公开"}
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem 
                           className="text-destructive"
@@ -130,9 +141,14 @@ export function BoardView({
                     <span className="text-muted-foreground">
                       {formatDate(template.lastModified)}
                     </span>
-                    {template.isFeatured && (
-                      <Badge className="text-[10px] h-5">精选</Badge>
-                    )}
+                    <div className="flex gap-1">
+                      {template.isFeatured && (
+                        <Badge className="text-[10px] h-5">精选</Badge>
+                      )}
+                      {template.isPublic && (
+                        <Badge variant="secondary" className="text-[10px] h-5">公开</Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
