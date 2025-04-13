@@ -541,6 +541,8 @@ export default function TemplateClient() {
               onTogglePublic={(template) => handleTogglePublic(template.id)}
               onDuplicateTemplate={(template) => handleDuplicateTemplate(template.id)}
               onDeleteTemplate={(template) => handleDeleteTemplate(template.id)}
+              onUpdateCategory={(category, templateId) => handleUpdateCategory(templateId, category)}
+              onPrepareNewCategory={(template) => handlePrepareNewCategory(template.id)}
             />
           )}
         </>

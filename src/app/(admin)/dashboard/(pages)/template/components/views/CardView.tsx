@@ -58,7 +58,7 @@ export function CardView({
           <div className="relative">
             {/* 缩略图 */}
             <div 
-              className="h-[150px] overflow-hidden cursor-pointer bg-gray-50"
+              className="h-[180px] overflow-hidden cursor-pointer bg-gray-50"
               onClick={() => onOpenPreview(template)}
             >
               {template.htmlContent ? (
@@ -81,7 +81,7 @@ export function CardView({
                     <body>${template.htmlContent}</body>
                     </html>
                   `}
-                  className="w-full h-[150px] border-0 overflow-hidden scrollbar-hide"
+                  className="w-full h-[180px] border-0 overflow-hidden scrollbar-hide"
                   title={template.name}
                   sandbox="allow-same-origin"
                 />
