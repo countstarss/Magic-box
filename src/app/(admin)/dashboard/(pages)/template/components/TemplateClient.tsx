@@ -133,21 +133,37 @@ export default function TemplateClient() {
   };
   
   // MARK: Handlers
-  const handleOpenPreview = async (templateId: number) => {
-    try {
-      // 先选中模板的基本信息
-      const template = templates.find(t => t.id === templateId);
-      if (template) {
-        selectTemplate(template);
-        
+  const handleOpenPreview = (templateId: number) => {
+    console.log(`准备预览模板(ID:${templateId})`, templates.length);
+    
+    // 查找模板的基本信息和完整信息
+    const templateBasic = templates.find(t => t.id === templateId);
+    
+    if (templateBasic) {
+      // 确保我们已经有完整的信息，包括htmlContent
+      const hasFullContent = !!templateBasic.htmlContent;
+      console.log(`模板(ID:${templateId})找到，是否有完整内容:`, hasFullContent);
+      
+      // 先关闭当前预览，确保状态重置
+      if (previewDialogOpen) {
+        setPreviewDialogOpen(false);
+        // 使用setTimeout确保状态更新
+        setTimeout(() => {
+          selectTemplate(templateBasic);
+          setPreviewDialogOpen(true);
+        }, 100);
+      } else {
+        // 即使暂时没有完整内容，也先选中并打开预览框 
+        // PreviewDialog会尝试从不同来源获取完整内容
+        selectTemplate(templateBasic);
         // 显示预览对话框
         setPreviewDialogOpen(true);
       }
-    } catch (error) {
-      console.error("打开预览时出错:", error);
+    } else {
+      console.error(`找不到模板(ID:${templateId})`);
       toast({
         title: "预览失败",
-        description: "无法加载模板预览",
+        description: "找不到指定的模板",
         variant: "destructive"
       });
     }

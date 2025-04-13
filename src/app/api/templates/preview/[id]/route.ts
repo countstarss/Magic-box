@@ -1,6 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
-import { templateDb } from "@/lib/db/template-db";
-import { headers } from "next/headers";
+import { NextRequest } from "next/server";
 
 // GET /api/templates/preview/[id] - 直接预览模板HTML内容
 export async function GET(
@@ -14,102 +12,81 @@ export async function GET(
       return new Response("无效的模板ID", { status: 400 });
     }
 
-    // 从数据库中获取模板
-    const template = await templateDb.getTemplate(id);
-
-    if (!template) {
-      return new Response("未找到模板", { status: 404 });
-    }
-
-    // 如果没有HTML内容，返回一个简单的占位符
-    if (!template.htmlContent) {
-      const placeholderHtml = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1">
-          <title>${template.name} - 预览</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              height: 100vh;
-              margin: 0;
-              flex-direction: column;
-              text-align: center;
-              color: #666;
-            }
-            h3 {
-              margin-bottom: 10px;
-            }
-            p {
-              margin-top: 0;
-            }
-          </style>
-        </head>
-        <body>
-          <h3>${template.name}</h3>
-          <p>此模板暂无预览内容</p>
-          <p style="font-size: 14px; margin-top: 10px;">${template.description || ""}</p>
-        </body>
-        </html>
-      `;
-
-      return new Response(placeholderHtml, {
-        headers: {
-          "Content-Type": "text/html; charset=utf-8",
-        },
-      });
-    }
-
-    // 包装unlayer的HTML内容以确保正确渲染
-    const enhancedHtml = `
+    // 服务器端不支持IndexedDB，返回错误提示HTML
+    const errorHtml = `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>${template.name} - 预览</title>
+        <title>预览错误</title>
         <style>
-          /* 确保内容适应窗口 */
           body {
-            margin: 0;
-            padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            background-color: #f5f5f5;
           }
-          /* 修复unlayer编辑器生成的内容在某些邮件客户端的显示问题 */
-          .email-body {
-            margin: 0 auto;
-            max-width: 100%;
+          .error-container {
+            max-width: 600px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
           }
-          table {
-            border-spacing: 0;
+          h2 {
+            color: #e11d48;
+            margin-top: 0;
           }
-          td {
-            padding: 0;
+          p {
+            margin: 20px 0;
+            line-height: 1.5;
+            color: #333;
           }
-          img {
-            border: 0;
-            max-width: 100%;
+          .code {
+            background: #f1f1f1;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 15px 0;
+            overflow-x: auto;
           }
-          @media only screen and (max-width: 600px) {
-            .email-body {
-              width: 100% !important;
-            }
+          button {
+            background-color: #f43f5e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+          }
+          button:hover {
+            background-color: #e11d48;
           }
         </style>
       </head>
       <body>
-        ${template.htmlContent}
+        <div class="error-container">
+          <h2>无法预览模板</h2>
+          <p>服务器端不支持IndexedDB API，因此无法获取模板内容。请在客户端应用中使用预览功能。</p>
+          <div class="code">
+            Error: MissingAPIError IndexedDB API missing on server side
+          </div>
+          <p>解决方法：请使用模板列表中的"预览"按钮查看模板，而不是直接访问此URL。</p>
+          <button onclick="window.close()">关闭窗口</button>
+        </div>
       </body>
       </html>
     `;
 
-    // 返回模板的HTML内容
-    return new Response(enhancedHtml, {
+    return new Response(errorHtml, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
       },

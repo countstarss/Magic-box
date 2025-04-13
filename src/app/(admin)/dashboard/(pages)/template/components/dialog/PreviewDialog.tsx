@@ -15,6 +15,10 @@ import { Template } from '../template-data';
 import { EmailTemplate } from '@/lib/db/template-db';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
+import { useTemplates } from '@/contexts/TemplateContext';
+
+// 缓存已加载的模板HTML内容
+const htmlContentCache = new Map<number, string>();
 
 interface PreviewDialogProps {
   isOpen: boolean;
@@ -29,53 +33,128 @@ export function PreviewDialog({ isOpen, onOpenChange, template }: PreviewDialogP
   const [error, setError] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const router = useRouter();
+  const { templates } = useTemplates();
 
-  // 获取模板的完整内容
+  // 获取完整的模板内容（优先使用缓存，然后尝试从上下文中获取）
   useEffect(() => {
-    if (isOpen && template) {
+    const loadTemplateContent = async () => {
+      if (!isOpen || !template) return;
+      
       setIsLoading(true);
       setError(null);
+      console.log(`开始加载模板(ID:${template.id})内容`);
       
-      // 从API获取完整的模板内容
-      fetch(`/api/templates/${template.id}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`获取模板内容失败: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.htmlContent) {
-            setHtmlContent(data.htmlContent);
-          } else {
-            setHtmlContent(null);
-          }
-        })
-        .catch(error => {
-          console.error('获取模板内容失败:', error);
-          setError(error.message || '获取模板内容失败');
-          setHtmlContent(null);
+      try {
+        // 1. 检查缓存是否有数据
+        if (htmlContentCache.has(template.id)) {
+          console.log(`使用缓存的模板内容(ID:${template.id})`);
+          setHtmlContent(htmlContentCache.get(template.id) || null);
           setIsLoading(false);
-        });
-    }
-  }, [isOpen, template]);
+          return;
+        }
+        
+        // 2. 从上下文中查找完整数据
+        console.log(`从上下文中查找模板(ID:${template.id})，当前templates长度:`, templates.length);
+        const fullTemplate = templates.find(t => t.id === template.id);
+        
+        if (fullTemplate && fullTemplate.htmlContent) {
+          console.log(`找到模板内容(ID:${template.id})`);
+          // 存入缓存
+          htmlContentCache.set(template.id, fullTemplate.htmlContent);
+          setHtmlContent(fullTemplate.htmlContent);
+          setIsLoading(false);
+        } else {
+          console.warn(`未找到模板内容(ID:${template.id})或内容为空`);
+          // 3. 尝试直接从IndexedDB获取单个模板（直接访问window.indexedDB）
+          try {
+            const db = await window.indexedDB.open("TemplateDatabase");
+            db.onsuccess = (event) => {
+              const dbInstance = (event.target as IDBOpenDBRequest).result;
+              const transaction = dbInstance.transaction("templates", "readonly");
+              const store = transaction.objectStore("templates");
+              const request = store.get(template.id);
+              
+              request.onsuccess = () => {
+                const data = request.result;
+                if (data && data.htmlContent) {
+                  console.log(`从IndexedDB直接获取到模板内容(ID:${template.id})`);
+                  htmlContentCache.set(template.id, data.htmlContent);
+                  setHtmlContent(data.htmlContent);
+                } else {
+                  console.error(`IndexedDB中未找到模板内容(ID:${template.id})`);
+                  setHtmlContent(null);
+                }
+                setIsLoading(false);
+              };
+              
+              request.onerror = (error) => {
+                console.error(`IndexedDB获取模板失败(ID:${template.id}):`, error);
+                setHtmlContent(null);
+                setIsLoading(false);
+                setError('从数据库获取模板内容失败');
+              };
+            };
+            
+            db.onerror = (error) => {
+              console.error(`打开IndexedDB失败:`, error);
+              setHtmlContent(null);
+              setIsLoading(false);
+              setError('无法打开数据库');
+            };
+          } catch (err) {
+            console.error(`IndexedDB操作出错:`, err);
+            setHtmlContent(null);
+            setIsLoading(false);
+            setError('读取数据库失败');
+          }
+        }
+      } catch (error) {
+        console.error('获取模板内容失败:', error);
+        setError('获取模板内容失败: ' + (error instanceof Error ? error.message : String(error)));
+        setHtmlContent(null);
+        setIsLoading(false);
+      }
+    };
+    
+    loadTemplateContent();
+    
+    // 当对话框关闭时，重置加载状态
+    return () => {
+      if (!isOpen) {
+        setIsLoading(true); // 为下次打开做准备
+      }
+    };
+  }, [isOpen, template, templates]);
 
-  // 监听iframe加载完成事件
+  // 处理iframe加载完成事件 - 修改这个useEffect
   useEffect(() => {
-    if (isOpen && template && iframeRef.current) {
-      setIsLoading(true);
-      
+    // 如果htmlContent已经设置，立即为iframe添加事件监听器
+    if (iframeRef.current) {
       const handleLoad = () => {
         setIsLoading(false);
+        console.log(`iframe载入完成(ID:${template?.id})`);
       };
       
       const handleError = () => {
         setIsLoading(false);
         setError('模板内容加载失败');
+        console.error(`iframe载入失败(ID:${template?.id})`);
       };
       
+      // 移除旧的事件监听器，确保不会重复添加
+      iframeRef.current.removeEventListener('load', handleLoad);
+      iframeRef.current.removeEventListener('error', handleError);
+      
+      // 添加新的事件监听器
       iframeRef.current.addEventListener('load', handleLoad);
       iframeRef.current.addEventListener('error', handleError);
+      
+      // 如果iframe已经加载完成但事件未触发，手动设置状态
+      if (iframeRef.current.contentDocument?.readyState === 'complete') {
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 100);
+      }
       
       return () => {
         if (iframeRef.current) {
@@ -84,43 +163,41 @@ export function PreviewDialog({ isOpen, onOpenChange, template }: PreviewDialogP
         }
       };
     }
-  }, [isOpen, template, previewDevice, htmlContent]);
+  }, [isOpen, template, previewDevice, htmlContent, iframeRef.current]);
 
   // 重试加载模板内容
   const handleRetry = () => {
-    if (template) {
-      setIsLoading(true);
-      setError(null);
+    if (!template) return;
+    
+    setIsLoading(true);
+    setError(null);
+    console.log(`重试加载模板(ID:${template.id})内容`);
+    
+    try {
+      // 清除可能存在问题的缓存
+      htmlContentCache.delete(template.id);
       
-      fetch(`/api/templates/${template.id}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`获取模板内容失败: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.htmlContent) {
-            setHtmlContent(data.htmlContent);
-          } else {
-            setHtmlContent(null);
-          }
-        })
-        .catch(error => {
-          console.error('重试获取模板内容失败:', error);
-          setError(error.message || '获取模板内容失败');
-          setHtmlContent(null);
-          setIsLoading(false);
-        });
+      // 重新从上下文中查找完整的模板数据
+      const fullTemplate = templates.find(t => t.id === template.id);
+      
+      if (fullTemplate && fullTemplate.htmlContent) {
+        console.log(`重试成功：找到模板内容(ID:${template.id})`);
+        htmlContentCache.set(template.id, fullTemplate.htmlContent);
+        setHtmlContent(fullTemplate.htmlContent);
+        setIsLoading(false);
+      } else {
+        console.warn(`重试失败：未找到模板内容(ID:${template.id})或内容为空`);
+        setHtmlContent(null);
+        setIsLoading(false);
+        setError('未找到模板HTML内容，请尝试刷新页面');
+      }
+    } catch (error) {
+      console.error('重试获取模板内容失败:', error);
+      setError('获取模板内容失败: ' + (error instanceof Error ? error.message : String(error)));
+      setHtmlContent(null);
+      setIsLoading(false);
     }
   };
-
-  // 当模板变化时重置加载状态
-  useEffect(() => {
-    if (template) {
-      setIsLoading(true);
-    }
-  }, [template]);
 
   if (!template) return null;
 
@@ -158,14 +235,77 @@ export function PreviewDialog({ isOpen, onOpenChange, template }: PreviewDialogP
     URL.revokeObjectURL(url);
   };
 
+  // 在新窗口中打开
+  const handleOpenInNewWindow = () => {
+    if (!htmlContent) return;
+    
+    const fullHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>${template.name} - 预览</title>
+        <style>
+          /* 确保内容适应窗口 */
+          body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+          }
+          /* 修复unlayer编辑器生成的内容在某些邮件客户端的显示问题 */
+          .email-body {
+            margin: 0 auto;
+            max-width: 100%;
+          }
+          table {
+            border-spacing: 0;
+          }
+          td {
+            padding: 0;
+          }
+          img {
+            border: 0;
+            max-width: 100%;
+          }
+          @media only screen and (max-width: 600px) {
+            .email-body {
+              width: 100% !important;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        ${htmlContent}
+      </body>
+      </html>
+    `;
+    
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write(fullHtml);
+      newWindow.document.close();
+    } else {
+      // 如果弹出窗口被浏览器阻止
+      toast({
+        title: "无法打开新窗口",
+        description: "浏览器可能阻止了弹出窗口，请检查您的浏览器设置。",
+        variant: "destructive"
+      });
+    }
+  };
+
   // 获取模板内容
   const getTemplateContent = () => {
     // 如果有HTML内容，使用它
     if (htmlContent) {
+      // 添加一个唯一的key来避免浏览器缓存问题
+      const cacheKey = `${template.id}-${previewDevice}-${Date.now()}`;
+      
       // 为unlayer编辑器生成的HTML添加必要的样式和脚本
       return `
         <!DOCTYPE html>
-        <html>
+        <html data-cache-key="${cacheKey}">
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -330,7 +470,7 @@ export function PreviewDialog({ isOpen, onOpenChange, template }: PreviewDialogP
               variant="outline" 
               size="sm" 
               className="gap-2"
-              onClick={() => window.open("/api/templates/preview/" + template.id, "_blank")}
+              onClick={handleOpenInNewWindow}
             >
               <ExternalLink size={16} />
               在新窗口打开

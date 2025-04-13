@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { templateDb } from "@/lib/db/template-db";
 
 // GET /api/templates/[id] - 获取单个模板的详细信息
 export async function GET(
@@ -14,14 +13,15 @@ export async function GET(
       return NextResponse.json({ error: "无效的模板ID" }, { status: 400 });
     }
 
-    // 从数据库中获取模板
-    const template = await templateDb.getTemplate(id);
-
-    if (!template) {
-      return NextResponse.json({ error: "未找到模板" }, { status: 404 });
-    }
-
-    return NextResponse.json(template);
+    // 服务器端不支持IndexedDB，返回错误信息
+    return NextResponse.json(
+      {
+        error: "服务器端不支持IndexedDB API，请在客户端直接访问模板数据",
+        statusCode: 500,
+        serverSideProcessing: false,
+      },
+      { status: 500 }
+    );
   } catch (error) {
     console.error("获取模板详情失败:", error);
     return NextResponse.json({ error: "获取模板详情失败" }, { status: 500 });
