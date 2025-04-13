@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Template } from "../template-data";
 
 /**
@@ -29,54 +29,76 @@ export function useBoardGroups(templates: Template[]) {
   /**
    * 将模板从一个类别移动到另一个类别
    */
-  const moveTemplate = (
-    templateId: number,
-    sourceCategory: string,
-    targetCategory: string
-  ) => {
-    // 查找模板
-    const template = boardGroups[sourceCategory]?.find(
-      (t) => t.id === templateId
-    );
-    if (!template) return;
+  const moveTemplate = useCallback(
+    (templateId: number, sourceCategory: string, targetCategory: string) => {
+      // 如果源类别和目标类别相同，不需处理
+      if (sourceCategory === targetCategory) return;
 
-    const newGroups = { ...boardGroups };
+      // 如果源类别不存在，不需处理
+      if (!boardGroups[sourceCategory]) return;
 
-    // 从源类别中移除
-    newGroups[sourceCategory] = newGroups[sourceCategory].filter(
-      (t) => t.id !== templateId
-    );
+      // 查找模板
+      const template = boardGroups[sourceCategory]?.find(
+        (t) => t.id === templateId
+      );
+      if (!template) return;
 
-    // 添加到目标类别
-    if (!newGroups[targetCategory]) {
-      newGroups[targetCategory] = [];
-    }
+      // 使用函数式更新，确保基于最新状态更新
+      setBoardGroups((prevGroups) => {
+        const newGroups = { ...prevGroups };
 
-    newGroups[targetCategory].push({
-      ...template,
-      category: targetCategory,
-    });
+        // 从源类别中移除
+        newGroups[sourceCategory] = newGroups[sourceCategory].filter(
+          (t) => t.id !== templateId
+        );
 
-    setBoardGroups(newGroups);
-  };
+        // 添加到目标类别
+        if (!newGroups[targetCategory]) {
+          newGroups[targetCategory] = [];
+        }
+
+        newGroups[targetCategory].push({
+          ...template,
+          category: targetCategory,
+        });
+
+        return newGroups;
+      });
+    },
+    [boardGroups]
+  );
 
   /**
    * 重新排序模板
    */
-  const reorderTemplate = (
-    category: string,
-    templateId: number,
-    oldIndex: number,
-    newIndex: number
-  ) => {
-    const newGroups = { ...boardGroups };
-    const [movedItem] = newGroups[category].splice(oldIndex, 1);
-    newGroups[category].splice(newIndex, 0, movedItem);
+  const reorderTemplate = useCallback(
+    (
+      category: string,
+      templateId: number,
+      oldIndex: number,
+      newIndex: number
+    ) => {
+      // 使用函数式更新
+      let allTemplates: Template[] = [];
 
-    setBoardGroups(newGroups);
+      setBoardGroups((prevGroups) => {
+        const newGroups = { ...prevGroups };
 
-    return Object.values(newGroups).flat();
-  };
+        if (!newGroups[category]) return newGroups;
+
+        const [movedItem] = newGroups[category].splice(oldIndex, 1);
+        newGroups[category].splice(newIndex, 0, movedItem);
+
+        // 收集所有模板用于返回
+        allTemplates = Object.values(newGroups).flat();
+
+        return newGroups;
+      });
+
+      return allTemplates;
+    },
+    []
+  );
 
   return {
     boardGroups,

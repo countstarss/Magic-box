@@ -70,20 +70,28 @@ export function CardView({
                       <meta charset="utf-8">
                       <style>
                         body {
-                          margin: 0;
                           transform: scale(0.35);
                           transform-origin: 0 0;
                           width: 285%;
                           height: 285%;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                        }
+                        /* 防止内部元素滚动 */
+                        * {
+                          overflow: hidden !important;
+                          max-height: 100% !important;
                         }
                       </style>
                     </head>
                     <body>${template.htmlContent}</body>
                     </html>
                   `}
-                  className="w-full h-[180px] border-0 overflow-hidden scrollbar-hide"
+                  className="w-full h-[180px] border-0 overflow-hidden pointer-events-none"
                   title={template.name}
                   sandbox="allow-same-origin"
+                  scrolling="no"
                 />
               ) : (
                 <div 

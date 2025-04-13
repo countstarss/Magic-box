@@ -543,6 +543,7 @@ export default function TemplateClient() {
               onDeleteTemplate={(template) => handleDeleteTemplate(template.id)}
               onUpdateCategory={(category, templateId) => handleUpdateCategory(templateId, category)}
               onPrepareNewCategory={(template) => handlePrepareNewCategory(template.id)}
+              templateCategories={categories.map(c => c.name)}
             />
           )}
         </>
