@@ -8,6 +8,7 @@ export interface Template {
   isFeatured: boolean;
   isStarred: boolean;
   lastModified: string;
+  htmlContent?: string; // 可选属性，用于存储模板的HTML内容
 }
 
 // 类别数据

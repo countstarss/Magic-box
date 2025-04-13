@@ -56,10 +56,40 @@ export function CardView({
           <div className="relative">
             {/* 缩略图 */}
             <div 
-              className="h-[180px] bg-cover bg-center cursor-pointer"
-              style={{ backgroundImage: `url(${placeholderImage})` }}
+              className="h-[180px] overflow-hidden cursor-pointer bg-gray-50"
               onClick={() => onOpenPreview(template)}
-            />
+            >
+              {template.htmlContent ? (
+                <iframe
+                  srcDoc={`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                      <meta charset="utf-8">
+                      <style>
+                        body {
+                          margin: 0;
+                          transform: scale(0.35);
+                          transform-origin: 0 0;
+                          width: 285%;
+                          height: 285%;
+                        }
+                      </style>
+                    </head>
+                    <body>${template.htmlContent}</body>
+                    </html>
+                  `}
+                  className="w-full h-full border-0"
+                  title={template.name}
+                  sandbox="allow-same-origin"
+                />
+              ) : (
+                <div 
+                  className="h-full w-full bg-cover bg-center"
+                  style={{ backgroundImage: `url(${placeholderImage})` }}
+                />
+              )}
+            </div>
             
             {/* 收藏按钮 */}
             <Button

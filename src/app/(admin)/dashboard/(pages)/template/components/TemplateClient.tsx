@@ -448,7 +448,8 @@ export default function TemplateClient() {
                 thumbnail: t.thumbnail,
                 isFeatured: t.isFeatured,
                 isStarred: t.isStarred,
-                lastModified: t.updatedAt.toISOString()
+                lastModified: t.updatedAt.toISOString(),
+                htmlContent: t.htmlContent
               }))}
               templateCategories={categories.map(c => c.name)}
               onOpenPreview={(template) => handleOpenPreview(template.id)}
@@ -474,7 +475,8 @@ export default function TemplateClient() {
                 thumbnail: t.thumbnail,
                 isFeatured: t.isFeatured,
                 isStarred: t.isStarred,
-                lastModified: t.updatedAt.toISOString()
+                lastModified: t.updatedAt.toISOString(),
+                htmlContent: t.htmlContent
               }))}
               onOpenPreview={(template) => handleOpenPreview(template.id)}
               onToggleStar={(template) => handleToggleStar(template.id)}
@@ -493,7 +495,8 @@ export default function TemplateClient() {
                 thumbnail: t.thumbnail,
                 isFeatured: t.isFeatured,
                 isStarred: t.isStarred,
-                lastModified: t.updatedAt.toISOString()
+                lastModified: t.updatedAt.toISOString(),
+                htmlContent: t.htmlContent
               }))}
               onOpenPreview={(template) => handleOpenPreview(template.id)}
               onToggleStar={(template) => handleToggleStar(template.id)}
