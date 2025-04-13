@@ -18,12 +18,16 @@ interface ListViewProps {
   templates: Template[];
   onOpenPreview: (template: Template) => void;
   onToggleStar: (template: Template) => void;
+  onDuplicateTemplate: (template: Template) => void;
+  onDeleteTemplate: (template: Template) => void;
 }
 
 export function ListView({
   templates,
   onOpenPreview,
-  onToggleStar
+  onToggleStar,
+  onDuplicateTemplate,
+  onDeleteTemplate
 }: ListViewProps) {
   return (
     <div className="bg-white rounded-lg border">
@@ -95,7 +99,10 @@ export function ListView({
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">
+                <DropdownMenuItem 
+                  className="text-destructive"
+                  onClick={() => onDeleteTemplate(template)}
+                >
                   <Trash2 className="mr-2 h-4 w-4" /> 删除
                 </DropdownMenuItem>
               </DropdownMenuContent>

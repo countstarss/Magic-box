@@ -98,7 +98,15 @@ export function SearchAndFilterBar({
       
       {/* 分类筛选与创建类别 */}
       <div className="flex items-center gap-1">
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+        <Select 
+          value={selectedCategory} 
+          onValueChange={(value) => {
+            // 避免重复更新相同的值
+            if (value !== selectedCategory) {
+              setSelectedCategory(value);
+            }
+          }}
+        >
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="全部类别" />
           </SelectTrigger>
@@ -127,7 +135,15 @@ export function SearchAndFilterBar({
       </div>
       
       {/* 排序方式 */}
-      <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortType)}>
+      <Select 
+        value={sortBy} 
+        onValueChange={(value) => {
+          // 避免重复更新相同的值
+          if (value !== sortBy) {
+            setSortBy(value as SortType);
+          }
+        }}
+      >
         <SelectTrigger className="w-[160px]">
           <SelectValue placeholder="排序方式" />
         </SelectTrigger>

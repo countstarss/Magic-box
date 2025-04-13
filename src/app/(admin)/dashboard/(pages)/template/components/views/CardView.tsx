@@ -33,6 +33,8 @@ interface CardViewProps {
   onToggleStar: (template: Template) => void;
   onUpdateCategory: (category: string) => void;
   onPrepareNewCategory: (template: Template) => void;
+  onDuplicateTemplate: (template: Template) => void;
+  onDeleteTemplate: (template: Template) => void;
 }
 
 export function CardView({
@@ -41,7 +43,9 @@ export function CardView({
   onOpenPreview,
   onToggleStar,
   onUpdateCategory,
-  onPrepareNewCategory
+  onPrepareNewCategory,
+  onDuplicateTemplate,
+  onDeleteTemplate
 }: CardViewProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -95,7 +99,7 @@ export function CardView({
                   <DropdownMenuItem>
                     <Pencil className="mr-2 h-4 w-4" /> 编辑
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDuplicateTemplate(template)}>
                     <Copy className="mr-2 h-4 w-4" /> 复制
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -124,7 +128,10 @@ export function CardView({
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive">
+                  <DropdownMenuItem 
+                    className="text-destructive"
+                    onClick={() => onDeleteTemplate(template)}
+                  >
                     <Trash2 className="mr-2 h-4 w-4" /> 删除
                   </DropdownMenuItem>
                 </DropdownMenuContent>
