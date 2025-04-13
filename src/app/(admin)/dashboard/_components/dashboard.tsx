@@ -23,7 +23,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import {
   Select,
@@ -32,6 +31,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+// 导入自定义Tabs组件
+import { 
+  CustomTabs,
+  CustomTabsContent,
+  CustomTabsList,
+  CustomTabsTrigger,
+  CustomTabsIndicator
+} from '@/components/ui/custom-tabs';
 
 // 示例数据
 const campaignPerformanceData = [
@@ -145,6 +153,23 @@ const scheduledCampaigns = [
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
+
+  // 处理标签页切换逻辑
+  const handleTabChange = (value: string) => {
+    // 根据当前和目标标签的位置关系确定滑动方向
+    const tabOrder = ['overview', 'campaigns', 'subscribers'];
+    const currentIndex = tabOrder.indexOf(activeTab);
+    const newIndex = tabOrder.indexOf(value);
+    
+    if (newIndex > currentIndex) {
+      setSlideDirection('right');
+    } else {
+      setSlideDirection('left');
+    }
+    
+    setActiveTab(value);
+  };
 
   return (
     <div className="flex flex-col p-6 space-y-6 h-full overflow-auto pb-24">
@@ -166,15 +191,16 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* 标签页切换 */}
-      <Tabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full max-w-md grid-cols-3">
-          <TabsTrigger value="overview">数据概览</TabsTrigger>
-          <TabsTrigger value="campaigns">邮件活动</TabsTrigger>
-          <TabsTrigger value="subscribers">订阅用户</TabsTrigger>
-        </TabsList>
+      {/* 标签页切换 - 使用CustomTabs替换 */}
+      <CustomTabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={handleTabChange}>
+        <CustomTabsList className="grid w-full max-w-md grid-cols-3">
+          <CustomTabsTrigger value="overview">数据概览</CustomTabsTrigger>
+          <CustomTabsTrigger value="campaigns">邮件活动</CustomTabsTrigger>
+          <CustomTabsTrigger value="subscribers">订阅用户</CustomTabsTrigger>
+          <CustomTabsIndicator />
+        </CustomTabsList>
         
-        <TabsContent value="overview" className="space-y-6">
+        <CustomTabsContent value="overview" className="space-y-6" slideDirection={slideDirection}>
           {/* 统计卡片区域 */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
@@ -359,9 +385,9 @@ const Dashboard = () => {
               </CardFooter>
             </Card>
           </div>
-        </TabsContent>
+        </CustomTabsContent>
         
-        <TabsContent value="campaigns" className="space-y-6">
+        <CustomTabsContent value="campaigns" className="space-y-6" slideDirection={slideDirection}>
           {/* 活动管理区域 */}
           <div className="flex justify-between">
             <div className="flex gap-2 items-center">
@@ -485,9 +511,9 @@ const Dashboard = () => {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+        </CustomTabsContent>
         
-        <TabsContent value="subscribers" className="space-y-6">
+        <CustomTabsContent value="subscribers" className="space-y-6" slideDirection={slideDirection}>
           <div className="flex justify-between">
             <div className="flex gap-2 items-center">
               <Input
@@ -556,8 +582,8 @@ const Dashboard = () => {
               <Button variant="outline">管理群组</Button>
             </CardFooter>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </CustomTabsContent>
+      </CustomTabs>
     </div>
   );
 };

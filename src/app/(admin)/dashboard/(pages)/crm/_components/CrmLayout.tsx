@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCrmStore } from '../store/useCrmStore';
 import UsersTable from './sections/UsersTable';
 import UserStats from './sections/UserStats';
@@ -12,9 +11,19 @@ import UserDetailsSidebar from './sidebars/UserDetailsSidebar';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Upload, RefreshCw } from 'lucide-react';
 
+// 导入自定义Tabs组件
+import { 
+  CustomTabs, 
+  CustomTabsContent, 
+  CustomTabsList, 
+  CustomTabsTrigger,
+  CustomTabsIndicator
+} from "@/components/ui/custom-tabs";
+
 const CrmLayout = () => {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [showSidebar, setShowSidebar] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   
   // 从Zustand获取全局状态和方法
   const { 
@@ -48,9 +57,21 @@ const CrmLayout = () => {
   };
   
   // 处理标签页切换
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = (value: string) => {
+    // 根据当前和新标签页的位置决定滑动方向
+    const tabOrder = ['all', 'active', 'premium', 'new', 'inactive', 'highValue'];
+    const currentIndex = tabOrder.indexOf(activeTab);
+    const newIndex = tabOrder.indexOf(value);
+    
+    // 如果新标签在当前标签右侧，则从右向左滑动；否则从左向右滑动
+    if (newIndex > currentIndex) {
+      setSlideDirection('right');
+    } else {
+      setSlideDirection('left');
+    }
+    
     resetFilter();
-    setActiveTab(tab);
+    setActiveTab(value);
   };
   
   // 打开用户详情侧边栏
@@ -107,75 +128,76 @@ const CrmLayout = () => {
       <UserStats />
       
       {/* 标签页和内容 */}
-      <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="mt-6">
+      <CustomTabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="mt-6">
         <div className="flex justify-between items-center mb-6">
-          <TabsList className="grid grid-cols-6 w-fit">
-            <TabsTrigger value="all">所有用户</TabsTrigger>
-            <TabsTrigger value="active">活跃用户</TabsTrigger>
-            <TabsTrigger value="premium">付费会员</TabsTrigger>
-            <TabsTrigger value="new">新用户</TabsTrigger>
-            <TabsTrigger value="inactive">沉睡用户</TabsTrigger>
-            <TabsTrigger value="highValue">高价值用户</TabsTrigger>
-          </TabsList>
+          <CustomTabsList className="grid grid-cols-6 w-fit">
+            <CustomTabsTrigger value="all">所有用户</CustomTabsTrigger>
+            <CustomTabsTrigger value="active">活跃用户</CustomTabsTrigger>
+            <CustomTabsTrigger value="premium">付费会员</CustomTabsTrigger>
+            <CustomTabsTrigger value="new">新用户</CustomTabsTrigger>
+            <CustomTabsTrigger value="inactive">沉睡用户</CustomTabsTrigger>
+            <CustomTabsTrigger value="highValue">高价值用户</CustomTabsTrigger>
+            <CustomTabsIndicator />
+          </CustomTabsList>
           
           {/* 筛选面板 */}
           <UserFilters activeTab={activeTab} />
         </div>
         
-        <TabsContent value="all" className="mt-0">
+        <CustomTabsContent value="all" className="mt-0" slideDirection={slideDirection}>
           <UsersTable 
             users={getUsersForTab()} 
             pagination={pagination}
             onPageChange={setPage}
             onUserSelect={openUserDetails}
           />
-        </TabsContent>
+        </CustomTabsContent>
         
-        <TabsContent value="active" className="mt-0">
+        <CustomTabsContent value="active" className="mt-0" slideDirection={slideDirection}>
           <UsersTable 
             users={getUsersForTab()} 
             pagination={pagination}
             onPageChange={setPage}
             onUserSelect={openUserDetails}
           />
-        </TabsContent>
+        </CustomTabsContent>
         
-        <TabsContent value="premium" className="mt-0">
+        <CustomTabsContent value="premium" className="mt-0" slideDirection={slideDirection}>
           <UsersTable 
             users={getUsersForTab()} 
             pagination={pagination}
             onPageChange={setPage}
             onUserSelect={openUserDetails}
           />
-        </TabsContent>
+        </CustomTabsContent>
         
-        <TabsContent value="new" className="mt-0">
+        <CustomTabsContent value="new" className="mt-0" slideDirection={slideDirection}>
           <UsersTable 
             users={getUsersForTab()} 
             pagination={pagination}
             onPageChange={setPage}
             onUserSelect={openUserDetails}
           />
-        </TabsContent>
+        </CustomTabsContent>
         
-        <TabsContent value="inactive" className="mt-0">
+        <CustomTabsContent value="inactive" className="mt-0" slideDirection={slideDirection}>
           <UsersTable 
             users={getUsersForTab()} 
             pagination={pagination}
             onPageChange={setPage}
             onUserSelect={openUserDetails}
           />
-        </TabsContent>
+        </CustomTabsContent>
         
-        <TabsContent value="highValue" className="mt-0">
+        <CustomTabsContent value="highValue" className="mt-0" slideDirection={slideDirection}>
           <UsersTable 
             users={getUsersForTab()} 
             pagination={pagination}
             onPageChange={setPage}
             onUserSelect={openUserDetails}
           />
-        </TabsContent>
-      </Tabs>
+        </CustomTabsContent>
+      </CustomTabs>
       
       {/* 用户详情侧边栏 */}
       <UserDetailsSidebar 

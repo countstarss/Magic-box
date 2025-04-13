@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { useLocalSettings } from "@/hooks/useLocalSettings";
+import { useLocalSettings } from "@/hooks/use-local-storage";
 import { 
   Settings, 
   Save, 

@@ -5,7 +5,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { 
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
@@ -24,6 +23,15 @@ import {
   Printer, Download, Plus, FileText, Calendar, Building, Receipt, FileDown 
 } from "lucide-react";
 
+// 导入自定义Tabs组件
+import { 
+  CustomTabs, 
+  CustomTabsContent, 
+  CustomTabsList, 
+  CustomTabsTrigger,
+  CustomTabsIndicator
+} from "@/components/ui/custom-tabs";
+
 // 示例发票数据
 const invoices = [
   { id: "INV-2023-12001", date: "2023-12-01", amount: "¥99.00", status: "可下载" },
@@ -38,6 +46,7 @@ const InvoiceManager = () => {
   const [invoiceType, setInvoiceType] = useState("vat");
   const [autoDownload, setAutoDownload] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   
   // 提交发票申请
   const handleGenerateInvoice = () => {
@@ -47,6 +56,17 @@ const InvoiceManager = () => {
       setIsGenerating(false);
       // 显示成功消息
     }, 1500);
+  };
+
+  // 处理标签切换
+  const handleTabChange = (value: string) => {
+    if (value === "vat" && invoiceType === "normal") {
+      setSlideDirection('left');
+    } else if (value === "normal" && invoiceType === "vat") {
+      setSlideDirection('right');
+    }
+    
+    setInvoiceType(value);
   };
 
   return (
@@ -78,17 +98,18 @@ const InvoiceManager = () => {
             
             <div className="space-y-3">
               <h4 className="font-medium">发票类型</h4>
-              <Tabs 
+              <CustomTabs 
                 defaultValue="vat" 
                 value={invoiceType} 
-                onValueChange={setInvoiceType}
+                onValueChange={handleTabChange}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="vat">增值税专用发票</TabsTrigger>
-                  <TabsTrigger value="normal">普通发票</TabsTrigger>
-                </TabsList>
-                <TabsContent value="vat" className="space-y-4 pt-4">
+                <CustomTabsList className="grid w-full grid-cols-2">
+                  <CustomTabsTrigger value="vat">增值税专用发票</CustomTabsTrigger>
+                  <CustomTabsTrigger value="normal">普通发票</CustomTabsTrigger>
+                  <CustomTabsIndicator />
+                </CustomTabsList>
+                <CustomTabsContent value="vat" className="space-y-4 pt-4" slideDirection={slideDirection}>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="company-name">公司名称</Label>
@@ -115,8 +136,8 @@ const InvoiceManager = () => {
                       <Input id="bank-account" placeholder="输入银行账号" defaultValue="6212XXXXXXXXXXXX" />
                     </div>
                   </div>
-                </TabsContent>
-                <TabsContent value="normal" className="space-y-4 pt-4">
+                </CustomTabsContent>
+                <CustomTabsContent value="normal" className="space-y-4 pt-4" slideDirection={slideDirection}>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="invoice-title">发票抬头</Label>
@@ -127,8 +148,8 @@ const InvoiceManager = () => {
                       <Input id="normal-tax-id" placeholder="输入纳税人识别号" defaultValue="91310000XXXXXXXX3B" />
                     </div>
                   </div>
-                </TabsContent>
-              </Tabs>
+                </CustomTabsContent>
+              </CustomTabs>
             </div>
             
             <Separator />

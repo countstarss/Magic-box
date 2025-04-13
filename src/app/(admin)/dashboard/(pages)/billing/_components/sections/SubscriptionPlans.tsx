@@ -8,6 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Check, X, CreditCard, Zap, Users, Mail, FileText } from "lucide-react";
 
+// 导入CustomTabs组件
+import { 
+  CustomTabs, 
+  CustomTabsContent, 
+  CustomTabsList, 
+  CustomTabsTrigger,
+  CustomTabsIndicator
+} from "@/components/ui/custom-tabs";
+
 // 定义不同的订阅计划
 const plans = [
   {
@@ -73,6 +82,7 @@ const plans = [
 const SubscriptionPlans = () => {
   const [currentPlan, setCurrentPlan] = useState("pro"); // 假设当前是专业版
   const [billingCycle, setBillingCycle] = useState("monthly");
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
 
   // 获取当前计划
   const activePlan = plans.find(plan => plan.id === currentPlan);

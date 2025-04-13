@@ -54,11 +54,11 @@ export function CardView({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {templates.map((template) => (
-        <Card key={template.id} className="overflow-hidden scrollbar-hide">
+        <Card key={template.id} className="overflow-hidden">
           <div className="relative">
             {/* 缩略图 */}
             <div 
-              className="h-[180px] overflow-hidden cursor-pointer bg-gray-50 scrollbar-hide"
+              className="h-[150px] overflow-hidden cursor-pointer bg-gray-50"
               onClick={() => onOpenPreview(template)}
             >
               {template.htmlContent ? (
@@ -81,7 +81,7 @@ export function CardView({
                     <body>${template.htmlContent}</body>
                     </html>
                   `}
-                  className="w-full h-full border-0"
+                  className="w-full h-[150px] border-0 overflow-hidden scrollbar-hide"
                   title={template.name}
                   sandbox="allow-same-origin"
                 />
@@ -125,7 +125,7 @@ export function CardView({
             </div>
           </div>
           
-          <CardHeader className="pb-2">
+          <CardHeader className="py-2">
             <div className="flex justify-between items-start">
               <CardTitle className="text-lg cursor-pointer" onClick={() => onOpenPreview(template)}>
                 {template.name}
@@ -202,7 +202,7 @@ export function CardView({
             </div>
           </CardHeader>
           
-          <CardContent>
+          <CardContent className="py-1">
             <p className="text-sm text-muted-foreground line-clamp-2">
               {template.description}
             </p>
