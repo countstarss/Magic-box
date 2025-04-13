@@ -20,6 +20,7 @@ interface ListViewProps {
   onToggleStar: (template: Template) => void;
   onDuplicateTemplate: (template: Template) => void;
   onDeleteTemplate: (template: Template) => void;
+  onUpdateCategory?: (category: string, templateId: number) => void;
 }
 
 export function ListView({
@@ -27,7 +28,8 @@ export function ListView({
   onOpenPreview,
   onToggleStar,
   onDuplicateTemplate,
-  onDeleteTemplate
+  onDeleteTemplate,
+  onUpdateCategory
 }: ListViewProps) {
   return (
     <div className="bg-white rounded-lg border">

@@ -32,7 +32,7 @@ interface CardViewProps {
   templateCategories: string[];
   onOpenPreview: (template: Template) => void;
   onToggleStar: (template: Template) => void;
-  onUpdateCategory: (category: string) => void;
+  onUpdateCategory: (category: string, templateId: number) => void;
   onPrepareNewCategory: (template: Template) => void;
   onDuplicateTemplate: (template: Template) => void;
   onDeleteTemplate: (template: Template) => void;
@@ -52,11 +52,11 @@ export function CardView({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {templates.map((template) => (
-        <Card key={template.id} className="overflow-hidden">
+        <Card key={template.id} className="overflow-hidden scrollbar-hide">
           <div className="relative">
             {/* 缩略图 */}
             <div 
-              className="h-[180px] overflow-hidden cursor-pointer bg-gray-50"
+              className="h-[180px] overflow-hidden cursor-pointer bg-gray-50 scrollbar-hide"
               onClick={() => onOpenPreview(template)}
             >
               {template.htmlContent ? (
@@ -144,7 +144,7 @@ export function CardView({
                         {templateCategories.filter(c => c !== '全部').map((category) => (
                           <DropdownMenuItem 
                             key={category}
-                            onClick={() => onUpdateCategory(category)}
+                            onClick={() => onUpdateCategory(category, template.id)}
                           >
                             {category}
                             {template.category === category && (

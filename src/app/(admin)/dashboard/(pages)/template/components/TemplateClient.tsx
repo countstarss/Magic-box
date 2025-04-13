@@ -5,10 +5,7 @@ import { PreviewDialog } from './dialog/PreviewDialog';
 import { CreateTemplateDialog } from './dialog/CreateTemplateDialog';
 import { CreateCategoryDialog } from './dialog/CreateCategoryDialog';
 import { Button } from '@/components/ui/button';
-import { 
-  PlusCircle, Search, Loader2
-} from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { PlusCircle, Loader2 } from 'lucide-react';
 
 // 导入视图组件
 import { CardView } from './views/CardView';
@@ -21,7 +18,7 @@ import { SearchAndFilterBar } from './filters/SearchAndFilterBar';
 import { ViewMode } from './filters/ViewModeToggle';
 import NoResult from './views/NoResult';
 import { useTemplates } from '@/contexts/TemplateContext';
-import { EmailTemplate } from '@/lib/db/template-db';
+import { useToast } from '@/hooks/use-toast';
 
 // 分类管理弹窗类型
 type CategoryDialogMode = 'create' | 'edit' | null;
@@ -246,7 +243,15 @@ export default function TemplateClient() {
       
       try {
         updateTemplate(updatedTemplate);
+        toast({
+          title: "更新模板分类成功",
+        });
       } catch (error) {
+        toast({
+          title: "更新模板分类失败",
+          description: error instanceof Error ? error.message : "操作失败",
+          variant: "destructive"
+        });
         console.error("更新模板分类失败:", error);
       }
     }
@@ -454,11 +459,7 @@ export default function TemplateClient() {
               templateCategories={categories.map(c => c.name)}
               onOpenPreview={(template) => handleOpenPreview(template.id)}
               onToggleStar={(template) => handleToggleStar(template.id)}
-              onUpdateCategory={(category) => {
-                if (selectedTemplateForCategory !== null) {
-                  handleUpdateCategory(selectedTemplateForCategory, category);
-                }
-              }}
+              onUpdateCategory={(category, templateId) => handleUpdateCategory(templateId, category)}
               onPrepareNewCategory={(template) => handlePrepareNewCategory(template.id)}
               onDuplicateTemplate={(template) => handleDuplicateTemplate(template.id)}
               onDeleteTemplate={(template) => handleDeleteTemplate(template.id)}
@@ -482,6 +483,7 @@ export default function TemplateClient() {
               onToggleStar={(template) => handleToggleStar(template.id)}
               onDuplicateTemplate={(template) => handleDuplicateTemplate(template.id)}
               onDeleteTemplate={(template) => handleDeleteTemplate(template.id)}
+              onUpdateCategory={(category, templateId) => handleUpdateCategory(templateId, category)}
             />
           )}
           
