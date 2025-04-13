@@ -25,6 +25,7 @@ import {
 import { 
   Star, MoreHorizontal, Copy, Pencil, Trash2, Tag, PlusCircle, Check
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface CardViewProps {
   templates: Template[];
@@ -47,6 +48,7 @@ export function CardView({
   onDuplicateTemplate,
   onDeleteTemplate
 }: CardViewProps) {
+  const router = useRouter();
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {templates.map((template) => (
@@ -96,7 +98,7 @@ export function CardView({
                   <DropdownMenuItem onClick={() => onOpenPreview(template)}>
                     预览
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push(`/dashboard/template/edit?id=${template.id}`)}>
                     <Pencil className="mr-2 h-4 w-4" /> 编辑
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onDuplicateTemplate(template)}>

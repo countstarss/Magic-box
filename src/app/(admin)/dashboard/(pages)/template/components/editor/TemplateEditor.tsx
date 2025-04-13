@@ -74,22 +74,44 @@ export default function TemplateEditor({
   const onEditorReady = () => {
     setIsEditorReady(true);
     
-    // 如果编辑现有模板，加载设计
-    if (template && template.design && emailEditorRef.current) {
-      emailEditorRef.current.editor.loadDesign(template.design);
-    } 
-    // 如果是导入HTML
-    else if (importType === 'html' && importHtml && emailEditorRef.current) {
-      emailEditorRef.current.editor.loadHTML(importHtml);
-    }
-    // 如果是导入设计
-    else if (importType === 'template' && importDesign && emailEditorRef.current) {
-      emailEditorRef.current.editor.loadDesign(importDesign);
-    }
-    // 如果已有保存的设计数据（例如从预览返回）
-    else if (savedDesignData && emailEditorRef.current) {
-      emailEditorRef.current.editor.loadDesign(savedDesignData);
-      savedDesignData = null; // 加载后清空
+    try {
+      // 如果编辑现有模板，加载设计
+      if (template && template.design && emailEditorRef.current) {
+        // 尝试确保design是一个有效的对象
+        const designData = typeof template.design === 'string' 
+          ? JSON.parse(template.design) 
+          : template.design;
+          
+        emailEditorRef.current.editor.loadDesign(designData);
+      } 
+      // 如果是导入HTML
+      else if (importType === 'html' && importHtml && emailEditorRef.current) {
+        emailEditorRef.current.editor.loadHTML(importHtml);
+      }
+      // 如果是导入设计
+      else if (importType === 'template' && importDesign && emailEditorRef.current) {
+        const designData = typeof importDesign === 'string'
+          ? JSON.parse(importDesign)
+          : importDesign;
+          
+        emailEditorRef.current.editor.loadDesign(designData);
+      }
+      // 如果已有保存的设计数据（例如从预览返回）
+      else if (savedDesignData && emailEditorRef.current) {
+        const designData = typeof savedDesignData === 'string'
+          ? JSON.parse(savedDesignData)
+          : savedDesignData;
+          
+        emailEditorRef.current.editor.loadDesign(designData);
+        savedDesignData = null; // 加载后清空
+      }
+    } catch (error) {
+      console.error('加载模板数据失败:', error);
+      // 尝试备选方案
+      if (template?.htmlContent && emailEditorRef.current) {
+        console.log('尝试加载HTML内容');
+        emailEditorRef.current.editor.loadHTML(template.htmlContent);
+      }
     }
   };
 
@@ -112,12 +134,23 @@ export default function TemplateEditor({
     try {
       setIsSaving(true);
       
-      // 导出设计JSON和HTML
-      // 这里是示例代码，实际使用时需要使用emailEditorRef.current.editor的方法
-      const designData = { /* 编辑器设计数据 */ };
-      const htmlContent = "<!-- 模板HTML内容 -->";
+      // 使用Promise获取设计数据和HTML内容
+      const designPromise = new Promise<any>((resolve) => {
+        emailEditorRef.current.editor.saveDesign((design: any) => {
+          resolve(design);
+        });
+      });
       
-      // 生成缩略图URL
+      const htmlPromise = new Promise<string>((resolve) => {
+        emailEditorRef.current.editor.exportHtml((data: {design: any, html: string}) => {
+          resolve(data.html);
+        });
+      });
+      
+      // 同时获取设计数据和HTML内容
+      const [designData, htmlContent] = await Promise.all([designPromise, htmlPromise]);
+      
+      // 生成缩略图URL - 理想情况下应从编辑器获取，但这里使用默认占位图
       const thumbnail = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180' viewBox='0 0 320 180'%3E%3Crect width='320' height='180' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='16' text-anchor='middle' dominant-baseline='middle' fill='%23888888'%3E邮件模板缩略图%3C/text%3E%3C/svg%3E";
       
       const templateData: Omit<EmailTemplate, "id" | "createdAt" | "updatedAt"> = {

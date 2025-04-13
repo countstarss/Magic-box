@@ -133,11 +133,23 @@ export default function TemplateClient() {
   };
   
   // MARK: Handlers
-  const handleOpenPreview = (templateId: number) => {
-    const template = templates.find(t => t.id === templateId);
-    if (template) {
-      selectTemplate(template);
-      setPreviewDialogOpen(true);
+  const handleOpenPreview = async (templateId: number) => {
+    try {
+      // 先选中模板的基本信息
+      const template = templates.find(t => t.id === templateId);
+      if (template) {
+        selectTemplate(template);
+        
+        // 显示预览对话框
+        setPreviewDialogOpen(true);
+      }
+    } catch (error) {
+      console.error("打开预览时出错:", error);
+      toast({
+        title: "预览失败",
+        description: "无法加载模板预览",
+        variant: "destructive"
+      });
     }
   };
   
