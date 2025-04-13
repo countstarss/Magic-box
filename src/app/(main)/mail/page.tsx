@@ -10,7 +10,7 @@ export default async function MailPage() {
 
   // 从服务器端获取初始邮件数据
   const initialEmails = await mailService.getEmails({ 
-    limit: 10,
+    limit: 50,
     offset: 0,
     unread: false
   });
