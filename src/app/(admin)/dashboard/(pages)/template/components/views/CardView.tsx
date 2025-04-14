@@ -225,7 +225,13 @@ export function CardView({
             >
               预览
             </Button>
-            <Button size="sm" className="w-[48%]">使用</Button>
+            <Button 
+              size="sm" 
+              className="w-[48%]"
+              onClick={() => router.push(`/dashboard/template/use?id=${template.id}`)}
+            >
+              使用
+            </Button>
           </CardFooter>
         </Card>
       ))}

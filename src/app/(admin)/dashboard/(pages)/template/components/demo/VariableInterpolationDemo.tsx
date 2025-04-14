@@ -15,10 +15,26 @@ import { PlusCircle, Trash2, Eye, RefreshCw, Mail, Copy } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import { Template } from "../template-data";
 
-export function VariableInterpolationDemo() {
+interface VariableInterpolationDemoProps {
+  template?: Template;
+  initialVariables?: Variable[];
+  previewMode?: boolean;
+  previewData?: VariableData;
+  onVariablesChange?: (newVariables: Variable[]) => void;
+}
+
+export function VariableInterpolationDemo({
+  template,
+  initialVariables = [],
+  previewMode = false,
+  previewData,
+  onVariablesChange
+}: VariableInterpolationDemoProps) {
   // 状态管理
   const [templateHtml, setTemplateHtml] = useState<string>(
+    template?.htmlContent || 
     `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
       <h2 style="color: #4f46e5;">您好，{{recipient_name|尊敬的用户}}！</h2>
       <p>感谢您对{{company_name|我们公司}}的支持与信任。</p>
@@ -36,7 +52,7 @@ export function VariableInterpolationDemo() {
     </div>`
   );
   const [recipients, setRecipients] = useState<VariableData[]>([
-    {
+    previewData || {
       recipient_name: "张三",
       username: "zhangsan123",
       registration_date: "2023年6月15日",
@@ -47,15 +63,25 @@ export function VariableInterpolationDemo() {
     }
   ]);
   const [currentRecipientIndex, setCurrentRecipientIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState("template");
+  const [activeTab, setActiveTab] = useState(previewMode ? "preview" : "template");
   const [editingRecipient, setEditingRecipient] = useState<VariableData>({...recipients[0]});
   const [availableVariables, setAvailableVariables] = useState<string[]>([]);
+  const [customVariables, setCustomVariables] = useState<Variable[]>(initialVariables);
   
   // 初始化：提取模板中的变量
   useEffect(() => {
     const extractedVars = extractVariables(templateHtml);
     setAvailableVariables(extractedVars);
   }, []);
+  
+  // 当previewData变化时更新recipients
+  useEffect(() => {
+    if (previewMode && previewData) {
+      setRecipients([previewData]);
+      setCurrentRecipientIndex(0);
+      setEditingRecipient({...previewData});
+    }
+  }, [previewMode, previewData]);
   
   // 处理模板HTML更改
   const handleTemplateChange = (html: string) => {
@@ -167,6 +193,33 @@ export function VariableInterpolationDemo() {
     return generatePreview(templateHtml, recipients[index]);
   };
   
+  // 如果是预览模式，只显示预览内容
+  if (previewMode) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>邮件预览</CardTitle>
+          <CardDescription>
+            使用填入的变量数据生成的最终邮件
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="border rounded-md p-0 h-[500px] overflow-auto">
+          <iframe 
+            srcDoc={generatePreview(templateHtml, recipients[0])}
+            className="w-full h-full border-0"
+            title="邮件预览"
+          />
+        </CardContent>
+        <CardFooter className="flex justify-end">
+          <Button variant="outline" onClick={handleCopyHtml}>
+            <Copy className="h-4 w-4 mr-2" />
+            复制HTML
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+  
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-6">邮件模板变量插值系统演示</h1>
@@ -192,7 +245,7 @@ export function VariableInterpolationDemo() {
                 initialHtml={templateHtml}
                 onChange={handleTemplateChange}
                 height="400px"
-                customVariables={predefinedVariables}
+                customVariables={[...predefinedVariables, ...customVariables]}
               />
             </CardContent>
             <CardFooter className="flex justify-between">
